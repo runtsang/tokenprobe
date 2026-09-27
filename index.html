@@ -1,0 +1,877 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="referrer" content="no-referrer">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="TokenProbe research overview, original figures, methods, case studies, and interactive accuracy, cost, and token-budget comparisons.">
+  <title>TokenProbe | On the Token Value Inequality in Efficient Reasoning</title>
+  <link rel="icon" href="assets/favicon.svg?v=20260927-emoji1" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/styles.css?v=20260927-footer4">
+  <link rel="stylesheet" href="assets/vendor/katex/katex.min.css">
+  <link rel="stylesheet" href="assets/paper.css?v=20260927-toc6">
+  <link rel="stylesheet" href="assets/unlimited-charts.css?v=20260927-gradient1">
+  <link rel="stylesheet" href="assets/wait-case.css?v=20260927-normlp4">
+  <link rel="stylesheet" href="assets/compression-limits.css?v=20260927-zoom2">
+  <link rel="stylesheet" href="assets/core-window-demo.css?v=20260927-core2">
+  <script src="data/core-window-trace.js?v=20260927-core1" defer></script>
+  <script src="assets/core-window-demo.js?v=20260927-core2" defer></script>
+  <script src="data/models.js?v=20260927-paper1" defer></script>
+  <script src="data/benchmarks.js?v=20260927-paper1" defer></script>
+  <script src="assets/chart.js?v=20260927-row2" defer></script>
+  <script src="assets/benchmarks.js?v=20260927-row2" defer></script>
+  <script src="assets/vendor/katex/katex.min.js" defer></script>
+  <script src="assets/section-toc.js?v=20260927-toc1" defer></script>
+  <script src="assets/paper.js?v=20260927-wait2" defer></script>
+  <script src="data/wait-case.js?v=20260927-wait2" defer></script>
+  <script src="assets/wait-case.js?v=20260927-normlp4" defer></script>
+  <script src="data/budgets.js?v=20260927-paper1" defer></script>
+  <script src="assets/budget-charts.js?v=20260927-gradient1" defer></script>
+  <script src="assets/unlimited-charts.js?v=20260927-gradient1" defer></script>
+  <script src="data/compression-limits.js?v=20260927-limits1" defer></script>
+  <script src="assets/compression-limits.js?v=20260927-zoom2" defer></script>
+</head>
+<body>
+<aside class="floating-toc" aria-label="Chapter navigation"><div class="toc-heading"><span>On this page</span><button id="toc-toggle" type="button" aria-expanded="false" aria-controls="toc-links" aria-label="Open chapter navigation"><span aria-hidden="true">☰</span></button></div><div class="toc-current"><small>Current section</small><strong id="toc-current">Overview</strong></div><nav id="toc-links" aria-label="Jump to a chapter"><a href="#overview" data-section-label="Overview">Overview</a><a href="#abstract" data-section-label="Abstract">Abstract</a><a href="#introduction" data-section-label="Introduction">Introduction</a><a href="#findings" data-section-label="Token value inequality">Token value inequality</a><a href="#method" data-section-label="Preserve core tokens. Compress redundancy.">Method</a><a href="#empirical-analysis" data-section-label="Further empirical analysis">Further analysis</a><a href="#accuracy-cost" data-section-label="Accuracy vs. Cost">Accuracy &amp; cost</a><a href="#benchmark-results" data-section-label="Complete benchmark results">Benchmark results</a><a href="#case-studies" data-section-label="Case Studies">Case studies</a><a href="#budget-analysis" data-section-label="Scenario Analysis Under an Unlimited Token Budget">Token budgets</a><a href="#compression-limits" data-section-label="Exploring Token Compression Limits">Compression limits</a></nav></aside>
+<main>
+  <header class="page-header">
+    <a class="wordmark" href="./"><span class="wordmark-icon" aria-hidden="true">🔍💎</span>TokenProbe<span class="wordmark-divider"></span><span class="wordmark-sub">Reasoning efficiency</span></a>
+    
+  </header>
+
+<nav class="section-nav" aria-label="Paper sections"><a href="#overview">Overview</a><a href="#findings">Findings</a><a href="#method">Method</a><a href="#accuracy-cost">Accuracy & cost</a><a href="#benchmark-results">Results</a><a href="#case-studies">Case studies</a><a href="#budget-analysis">Token budgets</a><a href="#compression-limits">Compression limits</a></nav>
+<section id="overview" class="paper-section paper-hero"><h1>On the Token Value Inequality<br> in Efficient Reasoning</h1><div class="paper-authors"><span>Runjia Zeng<sup>1</sup></span> <span>Hang Hua<sup>2</sup></span> <span>Yiyang Liu<sup>3</sup></span> <span>Zhiqiang Tao<sup>1</sup></span> <span>Ruixiang Tang<sup>4</sup></span> <span>Qifan Wang<sup>5</sup></span> <span>Cheng Han<sup>3</sup></span> <span>Dongfang Liu<sup>6†</sup></span></div><div class="paper-affiliations"><span><sup>1</sup>Rochester Institute of Technology</span> <span><sup>2</sup>MIT-IBM Watson AI Lab</span> <span><sup>3</sup>University of Missouri-Kansas City</span> <span><sup>4</sup>Rutgers University</span> <span><sup>5</sup>Meta AI</span> <span><sup>6</sup>Purdue University</span></div><p class="corresponding-author">† Corresponding author</p><div class="hero-links"><a href="#accuracy-cost">Explore the results ↓</a><a href="#method">Method & equations</a><a href="https://arxiv.org/abs/" target="_blank" rel="noopener noreferrer">Paper download ↗</a></div><div id="abstract" class="paper-abstract"><h2>Abstract</h2><p>Chain-of-Thought reasoning has enabled large language models to achieve substantial performance gains on complex tasks. However, these gains come at the cost of dramatically increased token consumption. This raises a fundamental question: is every token in the reasoning trace equally valuable? We present a diagnostic and optimization framework grounded in a key empirical finding: the value of tokens within a CoT reasoning sequence is highly non-uniform, and this non-uniformity can be effectively characterized by token-level log probability signals. We show that normalized log probability helps distinguish core tokens, which carry structural and decisive reasoning content, from redundant tokens, which are exploratory, low-confidence filler that contributes less directly to the final answer. Building on these findings, we formulate the <strong>TokenProbe</strong> framework around two empirical findings and one claim: findings identify token value inequality first and then establish TokenProbe as a core-token proxy, and the claim introduces an efficient GRPO objective positing that selectively compressing redundant tokens can yield Pareto improvements in the accuracy–token efficiency space. Empirically, our method preserves reasoning quality while reducing the token usage by 76% of the baseline. Under matched reasoning-length budgets, we show that it can even outperform strong flagship baselines like Gemini-3.1-Pro.</p></div><div id="introduction" class="paper-introduction paper-prose"><h2>Introduction</h2><p>The training objective of an autoregressive language model <sup class="paper-citation">[<a href="#reference-bengio2003neural">16</a>, <a href="#reference-radford2018improving">17</a>, <a href="#reference-brown2020language">18</a>]</sup> is to maximise the log-likelihood of the observed token sequence, <span class="paper-math" data-display="false" data-tex="\mathcal{L} = \sum_{t=1}^{T} \log p_\theta\!\bigl(s_t \mid s_{&lt;t},\, x\bigr)">\mathcal{L} = \sum_{t=1}^{T} \log p_\theta\!\bigl(s_t \mid s_{&lt;t},\, x\bigr)</span>. Under this objective, when the model faces a complex reasoning problem, directly predicting the answer yields a high-entropy conditional distribution, the model is uncertain about the answer, and <span class="paper-math" data-display="false" data-tex="p(y\mid x)">p(y\mid x)</span> spreads across many candidates. Chain-of-Thought (CoT) reasoning <sup class="paper-citation">[<a href="#reference-wei2022chain">19</a>, <a href="#reference-kojima2022large">20</a>]</sup> addresses this by introducing intermediate reasoning steps <span class="paper-math" data-display="false" data-tex="z">z</span> that decompose the prediction as <span class="paper-math" data-display="false" data-tex="p_\theta(y\mid x) = \sum_{z} p_\theta(z\mid x) \, p_\theta(y\mid x,z)">p_\theta(y\mid x) = \sum_{z} p_\theta(z\mid x) \, p_\theta(y\mid x,z)</span>. Each reasoning step <span class="paper-math" data-display="false" data-tex="z_i">z_i</span> narrows the solution space conditioned on its predecessors, substantially improving accuracy on multi-step reasoning tasks by explicitly introducing latent variables that reduce the dimensionality of the prediction problem <sup class="paper-citation">[<a href="#reference-zelikman2022star">21</a>, <a href="#reference-yao2023tree">22</a>, <a href="#reference-hao2024training">23</a>]</sup>.</p>
+<p>However, the introduction of latent variables and reasoning steps brings the extreme token usage spurge along the performance gain <sup class="paper-citation">[<a href="#reference-chen2024not">24</a>, <a href="#reference-sui2025stop">25</a>, <a href="#reference-avogaro2026sparc">26</a>, <a href="#reference-arora2025training">10</a>, <a href="#reference-sun2025latent">27</a>]</sup> (i.e., enabling CoT on Qwen-4B adds 24.1% in accuracy at a cost of 4.5<span class="paper-math" data-display="false" data-tex="\times">\times</span> more tokens). As shown in the Fig. <a href="#figure-1">1</a>, CoT reasoning currently exhibits several characteristic patterns. The <span class="manuscript-color-ideal"><strong>green curve</strong></span> represents the ideal reasoning trajectory, where the model moves from the question to the correct answer through a relatively direct semantic mapping. In contrast, the <span class="manuscript-color-fatal"><strong>red curve</strong></span> illustrates a fatal deviation path, in which one decisive wrong directional exploration drifts toward an incorrect conclusion. The <span class="manuscript-color-deadlock"><strong>purple curve</strong></span> depicts a circular deadlock path, where the model expends substantial token budget while becoming trapped in repetitive or unproductive loops <sup class="paper-citation">[<a href="#reference-holtzman2019curious">28</a>]</sup>. The <span class="manuscript-color-convergence"><strong>blue curve</strong></span> corresponds to a tortuous convergence path, where the model eventually reaches the correct answer, but only after a long and unnecessarily oscillatory reasoning process. This raises a central question: <em>Are these tokens uniformly valuable, especially along the <span class="manuscript-color-deadlock"><strong>purple curve</strong></span> and the <span class="manuscript-color-convergence"><strong>blue curve</strong></span>?</em>  If not, it means a substantial fraction of the extra tokens is low-value exploratory redundancy, there exists the possibility of a <strong>Pareto improvement</strong>: preserving core reasoning content while drastically cutting redundant tokens, thereby greatly reducing the cost of model using since all models are token-based billing under the next token prediction paradigm <sup class="paper-citation">[<a href="#reference-kaplan2020scaling">29</a>]</sup>.</p></div><figure class="paper-figure" id="figure-1"><div class="figure-header"><span>Figure 1</span></div><div class="figure-image-link"><img src="assets/figures/teaser.png" loading="lazy" width="2400" height="1236" alt="Figure 1: original paper figure"></div><figcaption><strong>Overview of TokenProbe: from token value inequality analysis §<a href="#findings">2</a> to efficient reasoning §<a href="#method">3</a></strong>. (a) Probing analysis shows that token contributions are highly unequal, and TokenProbe serves as an proxy for identifying core tokens. (b) Building on this insight, efficient GRPO improves it by preserving hidden core tokens, yielding better reasoning efficiency and Pareto performance.</figcaption></figure><div class="paper-introduction paper-prose"><p>Answering this question requires a suitable token-granularity diagnostic signal. Concretely, such a signal would arise as an inference-native by-product of generation, without relying on additional reward models <sup class="paper-citation">[<a href="#reference-ouyang2022training">5</a>, <a href="#reference-lightman2023let">30</a>, <a href="#reference-wang2024math">31</a>]</sup> or human annotation, thus avoiding post-processing overhead and extra forward passes. It would also preferably offer finer granularity, allowing more flexible intra-sequence discrimination than sequence-level or turn-level scores. Motivated by this, we naturally turn to the autoregressive model’s own output, <strong>token-level log probability</strong> <sup class="paper-citation">[<a href="#reference-wang2025beyond">32</a>, <a href="#reference-wang2024chain">33</a>, <a href="#reference-yang2025reasonflux">34</a>]</sup>.  It is a direct product of the training objective, already present at every decoding step, and its relative variation within a sequence encodes precisely the model&#x27;s local confidence dynamics.</p>
+<p>Building on this raw token-level signal, we introduce two derived quantities that play complementary roles. The Normalized Log Probability (<span class="paper-math" data-display="false" data-tex="\normlp{}">\normlp{}</span>) highlights candidate decisive tokens within a response, while the TokenProbe aggregates this signal into a scalar that tracks the model&#x27;s accuracy and token usage. They jointly drive our efficient GRPO (see §<a href="#method">3</a>) and explain <em>why</em> it yields Pareto improvements. Two properties make this lever sharp.
+① <strong>Instance-aware.</strong> By normalization, <span class="paper-math" data-display="false" data-tex="\normlp{}">\normlp{}</span> is a relative signal within each response. It identifies which tokens have confidence above the response mean (positive <span class="paper-math" data-display="false" data-tex="\normlp{}">\normlp{}</span>) and which fall below (negative <span class="paper-math" data-display="false" data-tex="\normlp{}">\normlp{}</span>), therefore distinguishing the core tokens flexibly and dynamically (see Tab. <a href="#wait-analysis">1</a>), rather than relying on absolute magnitudes. Building on this contrastive signal, we further define the TokenProbe of a response as the ratio of its tokens with positive <span class="paper-math" data-display="false" data-tex="\normlp{}">\normlp{}</span>.</p>
+<p>② <strong>Intrinsic.</strong> For a given model, the TokenProbe is relatively stable and robust to hyperparameter variations (see §S2). It therefore reflects the model&#x27;s intrinsic degree of certainty and training characteristics without additional processing or annotations, and in turn helps evaluate the model&#x27;s reasoning ability (see Fig. <a href="#figure-2">2</a>), including both its accuracy and its token usage.</p>
+<p>The remainder of the paper is structured as follows. In §<a href="#findings">2</a>, we conduct a systematic probing analysis of token-level log probability, formally introducing the <span class="paper-math" data-display="false" data-tex="\normlp{}">\normlp{}</span> and TokenProbe signals. Through two key findings, we establish that CoT reasoning exhibits a two-phase confidence structure (<strong>Finding 1</strong>) and that TokenProbe is consistently associated with both reasoning accuracy and token usage (<strong>Finding 2</strong>), laying the empirical foundation for our approach. Building on these insights, §<a href="#method">3</a> presents our efficient GRPO as a <strong>Claim</strong>, which translates the NormLP-based analysis into practice through two complementary mechanisms, <em>Selective KL Anchoring</em>, which focuses regularization on core tokens identified by NormLP, and <em>Reward Shaping</em>, which incentivizes dense and concise reasoning trajectories. §<a href="#benchmark-results">4</a> reports comprehensive experiments across multiple benchmarks and model families, showing a consistent trend toward Pareto improvement while maintaining accuracy and substantially reducing token usage. We close in §<a href="#empirical-analysis">4.3</a> with a detailed discussion of training dynamics, out-of-domain efficiency transfer, and diagnostic ablation.</p></div></section><section id="findings" class="paper-section"><div class="paper-section-heading"><h2>Token value inequality</h2></div><div class="findings-grid"><article class="finding-card" id="finding-1"><span class="finding-label">Finding 1</span><h3>Token Value Inequality</h3><div><span class="paper-math" data-display="false" data-tex="\blacktriangleright">\blacktriangleright</span> A two-phase confidence structure between think and answer stages.</div></article><article class="finding-card" id="finding-2"><span class="finding-label">Finding 2</span><h3>TokenProbe as a Core-Token Proxy</h3><div><span class="paper-math" data-display="false" data-tex="\blacktriangleright">\blacktriangleright</span> Higher TokenProbe → higher accuracy + lower token usage. <br>
+<span class="paper-math" data-display="false" data-tex="\blacktriangleright">\blacktriangleright</span> TokenProbe can distinguish &quot;Productive Exploration&quot; from &quot;Consumptive Getting Lost&quot;.</div></article><article class="finding-card" id="claim"><span class="finding-label">Claim</span><h3>Efficient GRPO</h3><div><span class="paper-math" data-display="false" data-tex="\blacktriangleright">\blacktriangleright</span> Achieving pareto improvement through efficient GRPO guided by the <span class="paper-math" data-display="false" data-tex="\normlp{}">\normlp{}</span> signal.</div></article></div><div class="theory-definitions"><article class="theory-definition"><h3>Normalized Log Probability</h3><p>Given a response consisting of tokens <span class="paper-math" data-display="false" data-tex="\{s_1,\dots,s_T\}">\{s_1,\dots,s_T\}</span> with per-token
+log probabilities <span class="paper-math" data-display="false" data-tex="\ell_t = \log p_\theta(s_t\mid s_{&lt;t})">\ell_t = \log p_\theta(s_t\mid s_{&lt;t})</span>, the
+normalized log probability of token <span class="paper-math" data-display="false" data-tex="t">t</span> is
+
+
+<div class="equation-shell" id=eq-normlp><div class="paper-math" data-display="true" data-tex="\normlp{}_t = \frac{\ell_t - \bar\ell}{\sigma_\ell + \epsilon},
+  \quad\text{where}\quad
+  \bar\ell = \frac{1}{T}\sum\nolimits_{t=1}^T \ell_t,\quad
+  \sigma_\ell = \sqrt{\frac{1}{T}\sum\nolimits_{t=1}^T(\ell_t-\bar\ell)^2}.">\normlp{}_t = \frac{\ell_t - \bar\ell}{\sigma_\ell + \epsilon},
+  \quad\text{where}\quad
+  \bar\ell = \frac{1}{T}\sum\nolimits_{t=1}^T \ell_t,\quad
+  \sigma_\ell = \sqrt{\frac{1}{T}\sum\nolimits_{t=1}^T(\ell_t-\bar\ell)^2}.</div><span class=equation-number>(1)</span></div></p></article><article class="theory-definition"><h3>TokenProbe, Positive Ratio of Normalized Log Probability</h3><p></p>
+<p>We define <strong>TokenProbe</strong> as the ratio of
+tokens whose normalized log probability is positive, where <span class="paper-math" data-display="false" data-tex="\mathbb{I}[\cdot]">\mathbb{I}[\cdot]</span> is the indicator function.</p>
+<div class="equation-shell" id=eq-tokenprobe><div class="paper-math" data-display="true" data-tex="\tokenprobe = \frac{1}{T}\sum\nolimits_{t=1}^T \mathbb{I}\!\left[\normlp{}_t &gt; 0\right],">\tokenprobe = \frac{1}{T}\sum\nolimits_{t=1}^T \mathbb{I}\!\left[\normlp{}_t &gt; 0\right],</div><span class=equation-number>(2)</span></div></article></div><div class="paper-prose"><p>Leveraging TokenProbe, we study five models of different scales across four reasoning benchmarks, AIME, MATH <sup class="paper-citation">[<a href="#reference-hendrycks2021measuring">38</a>, <a href="#reference-lightman2023let">30</a>]</sup>, AMC, and Olympiad-Bench <sup class="paper-citation">[<a href="#reference-he2024olympiadbench">39</a>]</sup>, under varied hyperparameter settings (see more in §S2). We organize the analysis in a coarse-to-fine manner and formulate two central findings supported by the resulting empirical evidence.</p></div><figure class="paper-figure" id="figure-2"><div class="figure-header"><span>Figure 2</span></div><div class="figure-image-link"><img src="assets/figures/analysis.png" loading="lazy" width="2400" height="831" alt="Figure 2: original paper figure"></div><figcaption><strong>TokenProbe as an indicator of reasoning efficiency</strong>. (a) TokenProbe increases from the think stage to the answer stage. (b) Across models, higher TokenProbe corresponds to better accuracy and lower token consumption. (c) Quartile analysis shows the same trend at the sample level.</figcaption></figure><div class="paper-prose finding-analysis" id="finding-explanations"><article aria-labelledby="finding-1-analysis-title"><h3 id="finding-1-analysis-title">Finding 1: Token Value Inequality</h3><p>To understand token contributions, we begin by examining the output structure of common reasoning models. The output of a thinking-enabled model <sup class="paper-citation">[<a href="#reference-guo2025deepseek">35</a>, <a href="#reference-muennighoff2025s1">36</a>]</sup> is naturally segmented into two phases: <strong>Think phase</strong>, spanning the content between <code>&lt;think&gt;</code> and <code>&lt;/think&gt;</code>, contains the intermediate reasoning process; and <strong>Answer phase</strong>, occurring after <code>&lt;/think&gt;</code>, contains the final answer output.</p>
+<p>As shown in Fig. <a href="#figure-2">2</a>(a), the log-probability distributions of the two phases exhibit a pronounced duality: Answer-phase TokenProbe is systematically 3%–20% higher than Think-phase TokenProbe. This reveals the underlying structure of CoT reasoning: the Think phase is a high-cost search process (i.e., the model is exploring solution paths), while the Answer phase is a low-cost decision output (i.e., the model has formed a definite conclusion) <sup class="paper-citation">[<a href="#reference-zelikman2022star">21</a>, <a href="#reference-hao2024training">23</a>]</sup>.  The “value” of reasoning is not uniformly distributed across every token of the Think phase. Part of it serves genuine reasoning functions, while the rest is exploratory noise.</p></article><article aria-labelledby="finding-2-analysis-title"><h3 id="finding-2-analysis-title">Finding 2: TokenProbe as a Core-Token Proxy</h3><p>Building on the finding of token value inequality, we then conduct a finer-grained analysis of TokenProbe to examine its underlying characteristics. More specifically, we define reasoning quality as the ability to achieve higher accuracy under a relatively low yet still reasonable token budget <sup class="paper-citation">[<a href="#reference-jin2024impact">37</a>, <a href="#reference-chen2024not">24</a>]</sup>. Under this view, high-quality reasoning is not merely shorter reasoning, but reasoning that avoids unnecessary detours and self-corrections while preserving performance.</p>
+<p>As shown in Fig. <a href="#figure-2">2</a>(b), our results suggest that TokenProbe serves as an effective proxy for this notion of reasoning quality. Across four representative models of different scales, we observe a clear pattern: as TokenProbe increases, accuracy consistently rises, while token usage consistently falls. This indicates that higher TokenProbe is associated not with premature truncation, but with more efficient reasoning trajectories that remove unnecessary repeated corrections. Moreover, this pattern is not confined to these four cases. Across all experimental settings we analyze in §S2, the Pearson correlation between TokenProbe and token usage is consistently negative, whereas the correlation between TokenProbe and accuracy is consistently positive, further supporting that TokenProbe is a useful empirical indicator of both reasoning effectiveness and token efficiency <sup class="paper-citation">[<a href="#reference-wang2025beyond">32</a>]</sup>.</p>
+<p>As shown in Fig. <a href="#figure-2">2</a>(c), we do a further analysis on Qwen-4B and Qwen-8B. Accuracy increases by 31.4% from the lowest to the highest quartile, while token usage drops by 57%. This pattern replicates faithfully on other model scales (see more in §S2).</p></article><p>While Findings 1–2 characterize reasoning quality at the phase and response level, identifying which specific tokens within a trace are productive requires finer-grained analysis. We therefore drill down to the individual token level <sup class="paper-citation">[<a href="#reference-lin2024rho">6</a>, <a href="#reference-wang2025beyond">32</a>]</sup>, demonstrating how <span class="paper-math" data-display="false" data-tex="\normlp{}">\normlp{}</span> provides fine-grained semantic discrimination within a reasoning trace (see the complete case in §S2).
+This finding carries the most direct practical implications. As shown in Tab. <a href="#wait-analysis">1</a>, we perform a detailed analysis of the commonly used token “Wait” at different positions within a single reasoning trace. We find that early occurrences often reflect productive self-correction, whereas late occurrences tend to be wasteful. This distinction is reflected by positive versus negative <span class="paper-math" data-display="false" data-tex="\normlp{}">\normlp{}</span>, thereby providing an empirical foundation for identifying core tokens in the subsequent efficient GRPO framework.</p></div><div id="wait-analysis" class="wait-analysis"><h3>Functional analysis of the “Wait” token</h3><div class="table-scroll"><table><thead><tr><th>Position</th><th>NormLP</th><th>Semantic role</th><th>Impact</th></tr></thead><tbody><tr><td><button type="button" class="wait-table-jump" data-wait-raw-index="54">Token [54]</button> (early)</td><td>+0.47</td><td>First verification discovers misinterpretation</td><td>Productive</td></tr><tr><td><button type="button" class="wait-table-jump" data-wait-raw-index="1273">Token [1273]</button> (mid-late)</td><td>−4.13</td><td>Re-questions already-confirmed step</td><td>Wasteful (+700 tokens)</td></tr></tbody></table></div><div class="wait-case-reading"><p>We complement the analysis with a fully token-level visualisation of the Qwen-4B reasoning trace summarised in Tab. <a href="#wait-analysis">Wait-token analysis</a>. Each token&#x27;s background is shaded by its <span class="paper-math" data-display="false" data-tex="\normlp{}">\normlp{}</span>. Green for above-mean (positive) confidence, red for below-mean (negative) confidence, with intensity log-scaled against the global max-abs across our five case studies. Intensities below a <span class="paper-math" data-display="false" data-tex="3\%">3\%</span> floor are left uncoloured to suppress imperceptible tints. The 17 occurrences of “Wait&#x27;&#x27;/“wait&#x27;&#x27; in this trace are additionally framed with a black border so they can be located at a glance, and the small grey number at the start of each physical line (1 to 80 across the three parts) provides a continuous line counter for cross-referencing.</p></div><div class="wait-case-metadata"><span><small>Model</small>Qwen-4B</span><span><small>Ground truth</small>49</span><span><small>Correct</small>Yes</span><span><small>TokenProbe / positive ratio</small>0.7402</span></div><div class="wait-case-prompt"><h4>Original prompt</h4><p>The operation @ is defined as <span class="paper-math" data-display="false" data-tex="\frac{m}{n}@\frac{p}{q} = (m)(p)\left(\frac{q}{n}\right)">\frac{m}{n}@\frac{p}{q} = (m)(p)\left(\frac{q}{n}\right)</span> for simplified fractions <span class="paper-math" data-display="false" data-tex="\frac{p}{q}">\frac{p}{q}</span>.  What is the simplified value of <span class="paper-math" data-display="false" data-tex="\frac{7}{30}@\frac{10}{21}">\frac{7}{30}@\frac{10}{21}</span>? Let&#x27;s think step by step and output the final answer within <code>\boxed{}</code>.</p></div>
+<div id="wait-token-case" class="wait-token-case"><div class="wait-trace-header"><div><h4>Full token-level reasoning trace</h4></div></div><div class="wait-color-key"><span><i class="positive-swatch"></i>Positive NormLP</span><span><i class="negative-swatch"></i>Negative NormLP</span><span><i class="wait-swatch"></i>Wait / wait</span><small>Original logarithmic color intensities · 3% tint floor</small></div><p class="wait-data-note">Every visible fragment is matched to its original token, with the original NormLP and logprob. </p><div class="wait-trace-controls"><div class="wait-part-tabs" role="tablist" aria-label="Reasoning trace parts"><button type="button" role="tab" id="wait-tab-1" aria-controls="wait-panel-1" data-wait-part="1" aria-selected="true">Part 1 · lines 1–16</button><button type="button" role="tab" id="wait-tab-2" aria-controls="wait-panel-2" data-wait-part="2" aria-selected="false">Part 2 · lines 17–36</button><button type="button" role="tab" id="wait-tab-3" aria-controls="wait-panel-3" data-wait-part="3" aria-selected="false">Part 3 · lines 37–80</button></div><div class="wait-jump-controls"><label class="sr-only" for="wait-jump">Jump to a Wait occurrence</label><select id="wait-jump"></select><button type="button" id="wait-previous" aria-label="Previous Wait">←</button><button type="button" id="wait-next" aria-label="Next Wait">→</button></div></div><div id="wait-token-detail" class="wait-token-detail" role="status" aria-live="polite"><strong>Click any token to inspect its NormLP.</strong></div><div id="wait-panel-1" class="wait-trace-panel" role="tabpanel" aria-labelledby="wait-tab-1"></div><div id="wait-panel-2" class="wait-trace-panel" role="tabpanel" aria-labelledby="wait-tab-2" hidden></div><div id="wait-panel-3" class="wait-trace-panel" role="tabpanel" aria-labelledby="wait-tab-3" hidden></div><p class="wait-trace-instructions">Hover or focus for a preview; click or press Enter to select. Left / Right arrows move between tokens. Source line numbers are retained while text wraps to fit your screen.</p><div id="wait-color-tooltip" class="wait-color-tooltip" hidden></div></div><details class="wait-source-explanation"><summary>Analysis</summary><ul><li><strong>Token [54]</strong>, early. <span class="paper-math" data-display="false" data-tex="\normlp{}=+0.47">\normlp{}=+0.47</span>. Productive “First verification. Discovers misinterpretation”. This is the <strong>1st</strong> framed “Wait” in the visualisation, on <em>line 2</em> of Fig. <a href="#wait-panel-1">Part 1/3</a>, opening the clause “<em>Wait, let me check that again. It says. `The operation @ is defined as m/n @ p/q = (m)(p)(q/n)&#x27; </em>”. The model has just paraphrased the operator and immediately stops to re-verify it against the original statement, catching the misparsing on the first pass.</li><li><strong>Token [1273]</strong>, late. <span class="paper-math" data-display="false" data-tex="\normlp{}=-4.13">\normlp{}=-4.13</span>. Wasteful “Re-questions already-confirmed step”, <span class="paper-math" data-display="false" data-tex="+700">+700</span> tokens of additional fruitless exploration. The <strong>12th</strong> framed “Wait”, on <em>line 13</em> of Fig. <a href="#wait-panel-1">Part 1/3</a>, opening “<em>Wait, but the problem says `simplified value of 7/30 @ 10/21&#x27;. So maybe 49 is already simplified? </em>”. The answer <span class="paper-math" data-display="false" data-tex="49">49</span> has by now been derived and double-checked. This “Wait” re-opens the case purely to re-read the problem statement once more, and is rendered with the deepest red intensity among all 17 framed occurrences. The hundreds of red-tinted tokens that follow it on lines 13 to 16 of Fig. <a href="#wait-panel-1">Part 1/3</a> and lines 25 and 32 of Fig. <a href="#wait-panel-2">Part 2/3</a> are the “<span class="paper-math" data-display="false" data-tex="+700">+700</span> tokens” tail mentioned in Tab. <a href="#wait-analysis">Wait-token analysis</a>. The trace finally exits this loop at the <code>**Final Answer**</code> block on line 38 (Fig. <a href="#wait-panel-3">Part 3/3</a>).</li></ul><p>The early “Wait” (Token [54]) sits in a green-tinted neighbourhood, while the late “Wait” (Token [1273]) is embedded in a continuous run of red tokens. A single low-<span class="paper-math" data-display="false" data-tex="\normlp{}">\normlp{}</span> “Wait” tends to drag a long tail of low-<span class="paper-math" data-display="false" data-tex="\normlp{}">\normlp{}</span> downstream tokens with it. This is exactly the asymmetry that motivates TokenProbe. The response-level positive-token ratio captures the productive-vs.-wasteful split in a single scalar, without requiring any token-by-token labelling.</p></details></div></section><section id="method" class="paper-section"><div class="paper-section-heading"><h2>Preserve core tokens. Compress redundancy.</h2></div><figure class="paper-figure" id="figure-3"><div class="figure-header"><span>Figure 3</span></div><div class="figure-image-link"><img src="assets/figures/method.png" loading="lazy" width="2400" height="622" alt="Figure 3: original paper figure"></div><figcaption><strong>Comparison of training strategies for efficient reasoning</strong>. (a) Vanilla GRPO treats all tokens equally. (b) <strong>Selective KL Anchoring (KL)</strong> rescales the KL regularizer per token and imposes a sparsity penalty on over-budget redundant tokens. (c) <strong>Reward Shaping (RS)</strong> reshapes the token-level advantage, upweighting core tokens and penalising overlong redundant spans.</figcaption></figure><div class="paper-prose"><p>Findings 1 and 2 jointly motivate a crucial claim: CoT reasoning contains a large volume of redundant tokens that are identifiable by <span class="paper-math" data-display="false" data-tex="\normlp{}">\normlp{}</span> signals, and these redundant tokens are directly associated with low accuracy and high token consumption. Therefore, if training can guide a model to: (a) preserve the reasoning density of core tokens, and (b) compress or eliminate redundant tokens, then it is possible to substantially reduce the token budget of CoT reasoning without significant loss in final-answer accuracy, achieving a Pareto efficiency improvement.</p>
+<p>Based on the analysis above, we build upon standard GRPO <sup class="paper-citation">[<a href="#reference-shao2024deepseekmath">1</a>, <a href="#reference-schulman2017proximal">2</a>, <a href="#reference-schulman2015high">3</a>]</sup>, which maximises the per-token objective
+
+
+<div class="equation-shell" id=eq-grpo><div class="paper-math" data-display="true" data-tex="\mathcal{L}_{\text{GRPO}} = \mathbb{E}\!\left[\,\frac{\pi_\theta(a_t \mid s_t)}{\pi_{\text{old}}(a_t \mid s_t)}\,\hat{A}_t \;-\; \beta_{\text{base}}\, D_{\text{KL}}\bigl(\pi_\theta \,\|\, \pi_{\text{ref}}\bigr)\,\right],">\mathcal{L}_{\text{GRPO}} = \mathbb{E}\!\left[\,\frac{\pi_\theta(a_t \mid s_t)}{\pi_{\text{old}}(a_t \mid s_t)}\,\hat{A}_t \;-\; \beta_{\text{base}}\, D_{\text{KL}}\bigl(\pi_\theta \,\|\, \pi_{\text{ref}}\bigr)\,\right],</div><span class=equation-number>(3)</span></div>
+
+
+where <span class="paper-math" data-display="false" data-tex="\hat{A}_t">\hat{A}_t</span> is the group-relative advantage and <span class="paper-math" data-display="false" data-tex="\beta_{\text{base}}">\beta_{\text{base}}</span> is a fixed base KL coefficient <sup class="paper-citation">[<a href="#reference-ziegler2019fine">4</a>, <a href="#reference-ouyang2022training">5</a>]</sup>. Guided by the <span class="paper-math" data-display="false" data-tex="\normlp{}">\normlp{}</span> signal, we propose <strong>two complementary modifications</strong> of Eq. 3 that target different components of the same skeleton in Fig. <a href="#figure-3">3</a>. <strong>Selective KL Anchoring</strong> (<strong>KL</strong>, §<a href="#selective-kl">3.1</a>) reshapes the <em>regularization</em> term so that redundant tokens receive an explicit sparsity pressure once a rollout overruns its budget. <strong>Reward Shaping</strong> (<strong>RS</strong>, §<a href="#reward-shaping">3.2</a>) reshapes the <em>advantage</em> inside the policy term so that core tokens on correct rollouts are upweighted while overlong redundant spans are penalised. The two variants share the same core-token mask and leave the update on wrong-answer rollouts (i.e., <span class="paper-math" data-display="false" data-tex="r^{\text{seq}} \leq 0">r^{\text{seq}} \leq 0</span>) untouched (see more discussion in §S4.5).</p>
+<p>To avoid overly sparse rewards and preserve semantic coherence, without introducing additional annotation effort at the turn level, we identify core tokens through a mathematically motivated window selection strategy (see more discussion in §S3.2). The core window is selected based on <span class="paper-math" data-display="false" data-tex="\normlp{}">\normlp{}</span>, with the intuition that tokens in high-density regions are more likely to correspond to essential reasoning steps <sup class="paper-citation">[<a href="#reference-lin2024rho">6</a>, <a href="#reference-cui2025entropy">7</a>]</sup>. Specifically, given the normalized scores <span class="paper-math" data-display="false" data-tex="\{\normlp{}_t\}_{t=1}^T">\{\normlp{}_t\}_{t=1}^T</span>, we apply a sliding window of size <span class="paper-math" data-display="false" data-tex="W">W</span> and compute the cumulative score for each window as <span class="paper-math" data-display="false" data-tex="s_i^{(W)} = \sum_{t=i}^{i+W-1} \normlp{}_t">s_i^{(W)} = \sum_{t=i}^{i+W-1} \normlp{}_t</span>. Finally, we greedily select the highest-scoring non-overlapping windows and define the corresponding token positions as core tokens (see §S3.1), yielding a binary core mask <span class="paper-math" data-display="false" data-tex="CT_t \in \{0,1\}">CT_t \in \{0,1\}</span>, where <span class="paper-math" data-display="false" data-tex="CT_t = 1">CT_t = 1</span> indicates a core token and <span class="paper-math" data-display="false" data-tex="CT_t = 0">CT_t = 0</span> a redundant token.</p></div><div class="method-variant" id="selective-kl"><h3>Selective KL Anchoring (KL)</h3><p></p>
+<p>As illustrated in Fig. <a href="#figure-3">3</a>(b), <strong>KL</strong> keeps the policy term of Eq. 3 intact and makes only the regularizer token-adaptive:
+
+
+<div class="equation-shell" id=eq-kl><div class="paper-math" data-display="true" data-tex="\mathcal{L}_{\text{KL}} = \mathbb{E}\!\left[\,\frac{\pi_\theta(a_t \mid s_t)}{\pi_{\text{old}}(a_t \mid s_t)}\,\hat{A}_t \;\;\boxed{\,-\, \beta_t\, D_{\text{KL}}\bigl(\pi_\theta \,\|\, \pi_{\text{ref}}\bigr) \,-\, \gamma_t\, \log \pi_\theta(a_t \mid s_t)\,}\;\right],">\mathcal{L}_{\text{KL}} = \mathbb{E}\!\left[\,\frac{\pi_\theta(a_t \mid s_t)}{\pi_{\text{old}}(a_t \mid s_t)}\,\hat{A}_t \;\;\boxed{\,-\, \beta_t\, D_{\text{KL}}\bigl(\pi_\theta \,\|\, \pi_{\text{ref}}\bigr) \,-\, \gamma_t\, \log \pi_\theta(a_t \mid s_t)\,}\;\right],</div><span class=equation-number>(4)</span></div>
+
+
+where the boxed block replaces the base KL term of Eq. 3. The <span class="paper-math" data-display="false" data-tex="\beta_t">\beta_t</span> is a per-token stability coefficient <sup class="paper-citation">[<a href="#reference-rafailov2023direct">8</a>]</sup> and <span class="paper-math" data-display="false" data-tex="\gamma_t">\gamma_t</span> activates a log-probability sparsity term on suppressible tokens (see §S3.3). The two coefficients are dispatched by a simple rule parameterised by the core mask <span class="paper-math" data-display="false" data-tex="CT_t">CT_t</span> and the current rollout length <span class="paper-math" data-display="false" data-tex="T">T</span> relative to the length limit <span class="paper-math" data-display="false" data-tex="L_{\text{limit}}">L_{\text{limit}}</span>:</p>
+<p><strong>Core tokens (<span class="paper-math" data-display="false" data-tex="CT_t = 1">CT_t = 1</span>).</strong>
+We keep the vanilla regularizer (i.e., <span class="paper-math" data-display="false" data-tex="\beta_t = \beta_{\text{base}},\, \gamma_t = 0">\beta_t = \beta_{\text{base}},\, \gamma_t = 0</span>), anchoring optimisation on reasoning-essential tokens without adding any sparsity pressure.
+<strong>Over-budget redundant tokens (<span class="paper-math" data-display="false" data-tex="CT_t = 0,\, T &gt; L_{\text{limit}}">CT_t = 0,\, T &gt; L_{\text{limit}}</span>).</strong>
+We remove the KL constraint (<span class="paper-math" data-display="false" data-tex="\beta_t = 0">\beta_t = 0</span>) and inject an overflow-proportional sparsity penalty <span class="paper-math" data-display="false" data-tex="\gamma_t = \lambda_{\text{decay}} \cdot (T - L_{\text{limit}}) / T">\gamma_t = \lambda_{\text{decay}} \cdot (T - L_{\text{limit}}) / T</span>, suppressing further redundant generation once a trace has already exceeded the budget.
+<strong>Within-budget redundant tokens (<span class="paper-math" data-display="false" data-tex="CT_t = 0,\, T \leq L_{\text{limit}}">CT_t = 0,\, T \leq L_{\text{limit}}</span>).</strong>
+We fall back to the stable setting (<span class="paper-math" data-display="false" data-tex="\beta_t = \beta_{\text{base}},\, \gamma_t = 0">\beta_t = \beta_{\text{base}},\, \gamma_t = 0</span>), tolerating moderate redundancy rather than prematurely suppressing it.</p></div><div class="method-variant" id="reward-shaping"><h3>Reward Shaping (RS)</h3><p></p>
+<p>As illustrated in Fig. <a href="#figure-3">3</a>(c), <strong>RS</strong> keeps the regularizer of Eq. 3 intact and instead reshapes the advantage inside the policy term.
+
+
+<div class="equation-shell" id=eq-rs><div class="paper-math" data-display="true" data-tex="\mathcal{L}_{\text{RS}} = \mathbb{E}\!\left[\,\frac{\pi_\theta(a_t \mid s_t)}{\pi_{\text{old}}(a_t \mid s_t)}\,\boxed{\,\hat{A}_t^{\text{RS}}\,} \;-\; \beta_{\text{base}}\, D_{\text{KL}}\bigl(\pi_\theta \,\|\, \pi_{\text{ref}}\bigr)\,\right],">\mathcal{L}_{\text{RS}} = \mathbb{E}\!\left[\,\frac{\pi_\theta(a_t \mid s_t)}{\pi_{\text{old}}(a_t \mid s_t)}\,\boxed{\,\hat{A}_t^{\text{RS}}\,} \;-\; \beta_{\text{base}}\, D_{\text{KL}}\bigl(\pi_\theta \,\|\, \pi_{\text{ref}}\bigr)\,\right],</div><span class=equation-number>(5)</span></div>
+
+
+where the boxed <span class="paper-math" data-display="false" data-tex="\hat{A}_t^{\text{RS}}">\hat{A}_t^{\text{RS}}</span> replaces the vanilla <span class="paper-math" data-display="false" data-tex="\hat{A}_t">\hat{A}_t</span> of Eq. 3 on correct rollouts (<span class="paper-math" data-display="false" data-tex="r^{\text{seq}} &gt; 0">r^{\text{seq}} &gt; 0</span>) and falls back to <span class="paper-math" data-display="false" data-tex="\hat{A}_t">\hat{A}_t</span> otherwise. Concretely,</p>
+<div class="equation-shell" id=eq-rs-adv><div class="paper-math" data-display="true" data-tex="\hat{A}_t^{\mathrm{RS}} = \hat{A}_t + \beta \left( \alpha \,\normlp_t \,\mathbb{I}[CT_t=1] - \lambda \,\frac{\max(0,\,T-L_{\mathrm{limit}})}{T}\,\mathbb{I}[CT_t=0] \right).">\hat{A}_t^{\mathrm{RS}} = \hat{A}_t + \beta \left( \alpha \,\normlp_t \,\mathbb{I}[CT_t=1] - \lambda \,\frac{\max(0,\,T-L_{\mathrm{limit}})}{T}\,\mathbb{I}[CT_t=0] \right).</div><span class=equation-number>(6)</span></div>
+
+
+where <span class="paper-math" data-display="false" data-tex="\normlp{}_t">\normlp{}_t</span> is the z-score normalised log probability, <span class="paper-math" data-display="false" data-tex="\alpha">\alpha</span> upweights core tokens along high-reward trajectories, <span class="paper-math" data-display="false" data-tex="\lambda">\lambda</span> penalises redundant tokens once a trace runs long (see §S3.4), and <span class="paper-math" data-display="false" data-tex="L_{\text{limit}} = \text{core\_len} \times \text{current\_scale}">L_{\text{limit}} = \text{core\_len} \times \text{current\_scale}</span> is a length budget progressively tightened through curriculum annealing <sup class="paper-citation">[<a href="#reference-bengio2009curriculum">9</a>]</sup>. We deliberately restrict shaping to correct rollouts (i.e., wrong-answer rollouts retain the vanilla <span class="paper-math" data-display="false" data-tex="\hat{A}_t">\hat{A}_t</span>), since rewarding core tokens on a failed reasoning trace would propagate misleading credit to precisely the tokens that should be re-examined.</div>
+<div class="core-window-demo" id="core-window-demo">
+<h3>Try core-window selection</h3>
+<p>Choose a window size <strong>W</strong> and a number of windows <strong>K</strong>, then click <strong>Preview</strong>. Following the appendix pseudocode, each window is scored by its sum of NormLP; the highest-scoring window is selected first, overlapping candidates are excluded, and selection repeats up to K times. The outlines show the core regions used by Reward Shaping on this correct response.</p>
+<form id="core-window-form" class="core-window-form" novalidate>
+<label for="core-window-size">Window size · W<input id="core-window-size" name="window-size" type="number" min="1" step="1" value="10" placeholder="10" aria-describedby="core-size-range"><small id="core-size-range"></small></label>
+<label for="core-window-count">Number of windows · K<input id="core-window-count" name="window-count" type="number" min="1" step="1" value="10" placeholder="10" aria-describedby="core-count-range"><small id="core-count-range"></small></label>
+<button type="submit">Preview</button>
+</form>
+<div id="core-window-status" class="core-window-status" role="status" aria-live="polite">Enter parameters or leave the fields blank to use the demo defaults: W = 10, K = 10.</div>
+<div id="core-window-results" hidden>
+<div class="core-window-legend"><i aria-hidden="true"></i>Outlined spans = selected core windows · click the map or choose a window to inspect it</div>
+<div id="core-window-map" class="core-window-map" role="group" aria-label="Selected windows across the complete response"></div>
+<div class="core-window-navigation"><label class="sr-only" for="core-window-jump">Go to a selected core window</label><select id="core-window-jump"></select><button id="core-window-previous" type="button" aria-label="Previous core window">←</button><button id="core-window-next" type="button" aria-label="Next core window">→</button></div>
+</div>
+<div id="core-window-trace" class="core-window-trace" tabindex="0" role="region" aria-label="Full token-level reasoning trace with core-window outlines"></div>
+<p class="core-window-footnote">The same Full token-level reasoning trace is shown here without color. Selection uses all 3,307 original tokens, including whitespace and line breaks. Windows are listed in selection order; only Preview updates the selection.</p>
+</div>
+</section><section class="paper-section compact-section"><div class="paper-section-heading"><h2 id="empirical-analysis">Further empirical analysis</h2></div><div class="figure-pair"><figure class="paper-figure" id="figure-4"><div class="figure-header"><span>Figure 4</span></div><div class="figure-image-link"><img src="assets/figures/dynamics.png" loading="lazy" width="2400" height="616" alt="Figure 4: original paper figure"></div><figcaption><strong>TokenProbe signals during RL training</strong>.<div class="figure-analysis"><p>To understand <em>how</em> our objectives compress reasoning, we track four
+diagnostic signals along RL training on Qwen-4B
+(Fig. <a href="#figure-4">4</a>). <strong>(a) Average reasoning length.</strong>
+This signal is the mean number of response tokens generated per rollout,
+our most direct proxy for training-time compression.
+As shown in Fig. <a href="#figure-4">4</a>(a), both KL and RS rapidly pull the
+response length from roughly <span class="paper-math" data-display="false" data-tex="3.7">3.7</span>K tokens at the start of RL to a much
+shorter regime <sup class="paper-citation">[<a href="#reference-arora2025training">10</a>, <a href="#reference-aggarwal2025l1">11</a>]</sup>.
+KL compresses more aggressively, stabilising at <span class="paper-math" data-display="false" data-tex="1.6">1.6</span> to <span class="paper-math" data-display="false" data-tex="1.8">1.8</span>K tokens,
+whereas RS remains longer at <span class="paper-math" data-display="false" data-tex="1.9">1.9</span> to <span class="paper-math" data-display="false" data-tex="2.0">2.0</span>K tokens.
+This indicates that both objectives successfully suppress excessive
+deliberation, but with different strength. KL enforces a hard sparsity
+pressure, while RS trades compression for a softer reward-shaped
+adjustment, which is consistent with the results shown in Tab. <a href="#benchmark-results">2</a>. <strong>(b) Core-token coverage.</strong>
+This signal is the fraction of generated tokens covered by
+TokenProbe-selected core windows
+(i.e., the number of selected windows <span class="paper-math" data-display="false" data-tex="\times">\times</span> window size, normalised
+by the average response length), and therefore measures how densely the remaining tokens carry useful signal.
+Fig. <a href="#figure-4">4</a>(b) shows that coverage rises steadily under both
+objectives, meaning the surviving tokens become progressively denser in
+TokenProbe-selected content.
+KL reaches a higher final coverage than RS, suggesting that KL removes
+redundant context more sharply and leaves a larger fraction of the
+response occupied by high-value windows.
+RS follows the same upward trend but stays lower, consistent with its
+longer generations, improving the density of useful tokens while
+retaining more non-core connective or exploratory material.
+<strong>(c) TokenProbe.</strong>
+As shown in Fig. <a href="#figure-4">4</a>(c), both methods trace a clear upward
+trajectory. KL rises from <span class="paper-math" data-display="false" data-tex="\sim">\sim</span><span class="paper-math" data-display="false" data-tex="0.84">0.84</span> to above <span class="paper-math" data-display="false" data-tex="0.92">0.92</span>, while RS
+increases more smoothly and eventually approaches the same regime.</p>
+<p>The steeper KL curve is consistent with a sharper compression effect,
+whereas the smoother RS curve reflects reward-shaped improvement without
+fully eliminating exploratory material.
+<strong>(d) Length violation rate.</strong>
+This signal is the fraction of valid responses whose length exceeds the
+dynamic TokenProbe budget
+(i.e., the selected core length multiplied by the current curriculum
+scale), diagnosing how well the policy stays within a progressively
+tightened budget.
+Fig. <a href="#figure-4">4</a>(d) shows that the violation rate first drops
+substantially as the model learns to respect the TokenProbe-derived
+budget, then rebounds later in training, especially for RS.
+This rebound is expected because the budget is progressively tightened through
+the curriculum scale while the policy is still adapting. See more in §<a href="#compression-limits">S6</a>.</p></div></figcaption></figure><figure class="paper-figure" id="figure-5"><div class="figure-header"><span>Figure 5</span></div><div class="figure-image-link"><img src="assets/figures/discussion.png" loading="lazy" width="2400" height="914" alt="Figure 5: original paper figure"></div><figcaption><strong>Transfer and ablation of TokenProbe-based efficient reasoning</strong>. (a) Our variants match accuracy with far fewer tokens. (b) Different hypeparameter settings for KL and RS (more in §S3.2).<div class="figure-analysis"><h4>Out-of-domain Efficiency Transfer</h4><p>To assess whether the token-efficiency gains transfer beyond mathematics,
+we evaluate the Qwen-4B base model, RS, and KL on four additional
+benchmarks spanning scientific, legal, and multi-disciplinary reasoning, including
+MMLU <sup class="paper-citation">[<a href="#reference-hendrycks2020measuring">12</a>]</sup>, MMLU-Pro <sup class="paper-citation">[<a href="#reference-wang2024mmlu">13</a>]</sup>,
+LSAT <sup class="paper-citation">[<a href="#reference-zhong2024agieval">14</a>]</sup>, and GPQA <sup class="paper-citation">[<a href="#reference-rein2024gpqa">15</a>]</sup>.
+As shown in Fig. <a href="#figure-5">5</a>, both objectives substantially
+compress length relative to the base model
+(i.e., <span class="paper-math" data-display="false" data-tex="4{,}401">4{,}401</span> tokens), with RS reduced to <span class="paper-math" data-display="false" data-tex="1{,}179">1{,}179</span> tokens (<span class="paper-math" data-display="false" data-tex="3.7\times">3.7\times</span>)
+and KL to <span class="paper-math" data-display="false" data-tex="935">935</span> tokens (<span class="paper-math" data-display="false" data-tex="4.7\times">4.7\times</span>).
+Crucially, this compression is not paid for in accuracy.
+RS maintains a competitive average of <span class="paper-math" data-display="false" data-tex="57.74">57.74</span> <span class="paper-math" data-display="false" data-tex="vs.">vs.</span> <span class="paper-math" data-display="false" data-tex="59.62">59.62</span>
+(i.e., <span class="paper-math" data-display="false" data-tex="-1.9\%">-1.9\%</span>), while KL actually <em>improves</em> over the base model
+to <span class="paper-math" data-display="false" data-tex="60.61">60.61</span> (i.e., <span class="paper-math" data-display="false" data-tex="+1.0\%">+1.0\%</span>) despite using far fewer tokens.
+The effect is most pronounced when compared with state-of-the-art closed-source models such as Sonnet 4.6, where our method achieves higher accuracy while using relatively same tokens (<span class="paper-math" data-display="false" data-tex="\sim150\times">\sim150\times</span> cheaper in Tab. API pricing).
+This confirms that the efficiency generalize robustly to diverse reasoning domains (see more discussions in §S4.2).</p><h4>Diagnostic Ablation</h4><p>We ablate the two hyperparameter groups of our method, the coefficients
+<span class="paper-math" data-display="false" data-tex="(\beta, w)">(\beta, w)</span> in KL and the
+coefficients <span class="paper-math" data-display="false" data-tex="(\alpha, \lambda)">(\alpha, \lambda)</span> in RS, reporting average token count and accuracy on the four
+math benchmarks.
+The GRPO baseline reaches <span class="paper-math" data-display="false" data-tex="42.3\%">42.3\%</span> at <span class="paper-math" data-display="false" data-tex="4{,}461">4{,}461</span> tokens on average and
+serves as the reference point throughout.
+<strong>Coefficients (<span class="paper-math" data-display="false" data-tex="\alpha">\alpha</span>, <span class="paper-math" data-display="false" data-tex="\lambda">\lambda</span>) in RS.</strong>
+A key design choice is the balance between the core-token reward
+<span class="paper-math" data-display="false" data-tex="\alpha">\alpha</span> and the redundancy penalty <span class="paper-math" data-display="false" data-tex="\lambda">\lambda</span>, which governs how
+aggressively redundant tokens are suppressed without starving the model
+of informative-token credit.
+Holding <span class="paper-math" data-display="false" data-tex="\alpha{=}0.05">\alpha{=}0.05</span>, raising <span class="paper-math" data-display="false" data-tex="\lambda">\lambda</span> from <span class="paper-math" data-display="false" data-tex="0.05">0.05</span> to <span class="paper-math" data-display="false" data-tex="0.08">0.08</span> reduces
+token usage by <span class="paper-math" data-display="false" data-tex="21\%">21\%</span> (i.e., <span class="paper-math" data-display="false" data-tex="2{,}291 \to 1{,}806">2{,}291 \to 1{,}806</span>) at essentially
+unchanged accuracy (i.e., <span class="paper-math" data-display="false" data-tex="36.1">36.1</span> <span class="paper-math" data-display="false" data-tex="vs.">vs.</span> <span class="paper-math" data-display="false" data-tex="36.3">36.3</span>), confirming that a
+stronger length penalty compresses responses without harming
+correctness.
+Further raising <span class="paper-math" data-display="false" data-tex="\alpha">\alpha</span> to <span class="paper-math" data-display="false" data-tex="0.07">0.07</span> at <span class="paper-math" data-display="false" data-tex="\lambda{=}0.08">\lambda{=}0.08</span> improves accuracy
+to <span class="paper-math" data-display="false" data-tex="39.9\%">39.9\%</span> at <span class="paper-math" data-display="false" data-tex="2{,}179">2{,}179</span> tokens, indicating that a larger core-token
+reward encourages more informative reasoning rather than merely shorter
+traces.
+<strong>Coefficients  (<span class="paper-math" data-display="false" data-tex="\beta">\beta</span>) and window size (<span class="paper-math" data-display="false" data-tex="w">w</span>) in KL.</strong>
+The shaping coefficient <span class="paper-math" data-display="false" data-tex="\beta">\beta</span> controls the magnitude of the per-token
+advantage correction, while the window size <span class="paper-math" data-display="false" data-tex="w">w</span> controls the
+neighbourhood over which TokenProbe density is averaged.
+Under a matched window, <span class="paper-math" data-display="false" data-tex="\beta{=}5\times 10^{-3}">\beta{=}5\times 10^{-3}</span> outperforms
+<span class="paper-math" data-display="false" data-tex="\beta{=}5\times 10^{-4}">\beta{=}5\times 10^{-4}</span> (i.e., <span class="paper-math" data-display="false" data-tex="42.3">42.3</span> <span class="paper-math" data-display="false" data-tex="vs.">vs.</span> <span class="paper-math" data-display="false" data-tex="39.0">39.0</span> at <span class="paper-math" data-display="false" data-tex="\approx">\approx</span>2,200
+tokens), indicating that a sufficiently strong shaping signal is
+necessary for the token-level guidance to affect policy updates.
+Comparing window sizes at <span class="paper-math" data-display="false" data-tex="\beta{=}5\times 10^{-3}">\beta{=}5\times 10^{-3}</span>, <span class="paper-math" data-display="false" data-tex="w{=}10">w{=}10</span> yields
+<span class="paper-math" data-display="false" data-tex="42.3\%">42.3\%</span> at <span class="paper-math" data-display="false" data-tex="2{,}023">2{,}023</span> tokens <span class="paper-math" data-display="false" data-tex="vs.">vs.</span> <span class="paper-math" data-display="false" data-tex="41.4\%">41.4\%</span> at <span class="paper-math" data-display="false" data-tex="2{,}008">2{,}008</span> tokens for
+<span class="paper-math" data-display="false" data-tex="w{=}20">w{=}20</span>, a marginal difference that suggests the method is
+insensitive to moderate window-size variation.</p></div></figcaption></figure></div></section>
+
+  <section id="accuracy-cost" class="chart-section" aria-labelledby="chart-title">
+    <h2 id="chart-title">Accuracy vs. Cost</h2>
+    <div class="chart-heading">
+      <div class="title-block"><p id="subtitle">In-domain reasoning accuracy · Estimated output cost per 1,000 responses (USD)</p></div>
+      <div class="toolbar">
+        <div class="icon-row">
+          <button class="icon-button" id="copy-link" aria-label="Copy link to this chart" title="Copy chart link"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-2 2M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l2-2"/></svg></button>
+          
+          <button class="icon-button" id="table-toggle" aria-label="Show data table" aria-pressed="false" title="Switch chart / table"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg></button>
+          
+        </div>
+        <div class="control-row">
+          <button id="models-button" class="models-button" aria-expanded="false" aria-controls="models-panel"><span id="model-count">Loading models…</span><svg viewBox="0 0 16 16"><path d="m5 6 3-3 3 3m-6 4 3 3 3-3"/></svg></button>
+          <button id="filters-button" class="icon-button" aria-label="Open filters" aria-expanded="false" aria-controls="filters-panel" title="Filters"><svg viewBox="0 0 24 24"><path d="M3 4h18l-7 8v7l-4 2v-9Z"/></svg></button>
+          <button id="settings-button" class="icon-button" aria-label="Open chart display settings" aria-expanded="false" aria-controls="settings-panel" title="Display settings"><svg viewBox="0 0 24 24"><path d="M3 6h5m4 0h9M3 12h11m4 0h3M3 18h2m4 0h12M8 3v6m6 0v6M5 15v6"/></svg></button>
+        </div>
+        <section id="models-panel" class="popover models-panel" hidden aria-label="Select models">
+          <div class="popover-heading">Select models<button class="close-panel" aria-label="Close model selector">×</button></div>
+          <input type="search" id="model-search" placeholder="Search models or providers…" aria-label="Search models">
+          <div class="selection-actions"><button id="select-all">Select all</button><button id="select-none">Clear all</button><button id="select-frontier">Pareto only</button></div>
+          <div id="models-list"></div>
+          <p class="panel-note">Models without cost estimates appear in the data table.</p>
+        </section>
+        <section id="filters-panel" class="popover" hidden aria-label="Model filters">
+          <div class="popover-heading">Filters<button class="close-panel" aria-label="Close filters">×</button></div>
+          <fieldset><legend>Model category</legend><label><input type="checkbox" name="category" value="closed" checked> Closed-source APIs</label><label><input type="checkbox" name="category" value="open" checked> Open-source baselines</label><label><input type="checkbox" name="category" value="ours" checked> Our models</label></fieldset>
+          <label class="field">Minimum accuracy (%)<input type="number" id="min-accuracy" min="0" max="100" step="0.1" placeholder="0"></label>
+          <label class="field">Maximum cost (USD / 1,000 responses)<input type="number" id="max-cost" min="0" step="0.1" placeholder="No limit"></label>
+          <button id="reset-filters" class="subtle-button">Reset filters</button>
+        </section>
+        <section id="settings-panel" class="popover" hidden aria-label="Display settings">
+          <div class="popover-heading">Chart display<button class="close-panel" aria-label="Close display settings">×</button></div>
+          <label class="field">Cost scale<select id="cost-scale"><option value="log">Logarithmic</option><option value="linear">Linear</option></select></label>
+          <label class="field">Cost unit<select id="cost-unit"><option value="1000">Per 1,000 responses</option><option value="1">Per response</option></select></label>
+          <label class="field">Color by<select id="color-by"><option value="provider">Provider + our models</option><option value="category">Model category</option></select></label>
+          <label class="field">Point labels<select id="point-labels"><option value="all">All models</option><option value="frontier">Pareto & our models</option><option value="none">Hide labels</option></select></label>
+          <label><input type="checkbox" id="show-pareto" checked> Show Pareto line</label>
+          <label><input type="checkbox" id="show-quadrant" checked> Show attractive quadrant</label>
+        </section>
+      </div>
+    </div>
+    <div class="chart-key"><button id="quadrant-key" aria-pressed="true"><span class="quadrant-swatch"></span>Most attractive quadrant</button><button id="pareto-key" aria-pressed="true"><span class="pareto-swatch"></span>Pareto line</button><span class="key-hint">Higher accuracy · Lower cost</span></div>
+    <div id="legend" class="legend" aria-label="Toggle groups in chart"></div>
+    <div id="chart-view">
+      <div id="plot-wrap" class="plot-wrap"><svg id="plot" role="group" aria-label="Interactive accuracy versus cost scatter plot"></svg><div id="tooltip" class="tooltip" hidden role="status"></div><div id="empty-state" class="empty-state" hidden>No models match these filters.<button id="reset-empty" class="subtle-button">Reset view</button></div></div>
+      <div class="chart-footnote"><span id="chart-status"></span><span>Hover or focus for details · Click to pin & highlight the In-domain row</span></div>
+    </div>
+    <div id="table-view" hidden><div class="table-scroll"><table id="data-table"><caption class="sr-only">Model accuracy and output cost. Click column headers to sort.</caption><thead><tr><th scope="col" aria-sort="none"><button data-sort="name">Model <span>↕</span></button></th><th scope="col" aria-sort="none"><button data-sort="provider">Provider <span>↕</span></button></th><th scope="col" aria-sort="none"><button data-sort="category">Category <span>↕</span></button></th><th scope="col" aria-sort="none"><button data-sort="accuracy">Accuracy (%) <span>↕</span></button></th><th scope="col" aria-sort="none"><button data-sort="tokens">Avg. tokens <span>↕</span></button></th><th scope="col" aria-sort="none"><button data-sort="cost">Cost (USD) <span>↕</span></button></th><th scope="col">Pareto</th></tr></thead><tbody id="table-body"></tbody></table></div><div class="chart-footnote"><span id="table-status"></span><span id="table-unit"></span></div></div>
+    <p id="pricing-footnote" class="pricing-footnote">† Serving-price estimates: <strong>Qwen3-4B — $0.10 / 1M output tokens</strong>; <strong>Qwen3-8B — $0.13 / 1M output tokens</strong> (using the supplied <code>qwen/qwen3.5-9b</code> rate as a pricing reference). Both are conservative, high-side estimates; personal self-hosted deployment may achieve lower effective usage costs.</p>
+    <div class="methodology">
+      <details><summary>ⓘ Cost calculation<span class="expand-mark">+</span></summary><div class="detail-content"><p>Cost is estimated from generated completion tokens, including billable reasoning tokens where present. At the default unit:</p><p class="formula">Cost per 1,000 responses = mean output tokens × output price per million tokens ÷ 1,000</p><p>Only output-token cost is included; input tokens, caching, tool calls, and hosting overhead are excluded. API prices retain the September 24, 2026 snapshot used by the paper's plotting script. Qwen3-4B uses $0.10 / million output tokens; Qwen3-8B uses $0.13 / million output tokens, based on the user-supplied <code>qwen/qwen3.5-9b</code> reference price. The latter is a pricing proxy, not a measured Qwen3-8B serving price. Both are conservative, high-side estimates; personal self-hosted deployment may achieve lower effective usage costs. All Qwen3-4B and Qwen3-8B variants use their respective estimate.</p></div></details>
+      <details><summary>ⓘ Accuracy & evaluation settings<span class="expand-mark">+</span></summary><div class="detail-content"><p>Accuracy values are the reported in-domain averages from the paper and its existing plotting script, covering AIME-2025, MATH-500, AMC, and OlympiadBench. Reported averages are preserved, rather than recomputed from rounded per-benchmark values.</p></div></details>
+      
+      <details><summary>ⓘ How to read this chart<span class="expand-mark">+</span></summary><div class="detail-content"><p>Each point is one model configuration. Higher means more accurate; farther left means lower estimated output cost. The dotted Pareto line connects configurations for which no other visible model is both at least as accurate and at least as inexpensive, with one strict improvement.</p><p>The pale green quadrant marks above-median accuracy and below-median cost among the currently visible models. It is a visual guide, not a statistical significance claim. The frontier and quadrant update with your selection and filters. Our trained variants have a green halo.</p></div></details>
+      
+    </div>
+  </section>
+  <section id="benchmark-results" class="benchmark-results" aria-labelledby="benchmark-results-title">
+    <div class="benchmark-intro"><h2 id="benchmark-results-title">Complete benchmark results</h2><p>All reported model configurations from the main results, expanded API comparison, and token-budget tables. Reported averages are preserved. Output prices and estimated costs are included. <span id="benchmark-coverage"></span></p></div>
+    <section id="in-domain-results" class="benchmark-section" aria-labelledby="in-domain-title">
+      <div class="benchmark-heading"><div><h3 id="in-domain-title">In-domain</h3><p>AIME-2025 · MATH-500 · AMC · OlympiadBench</p></div><a href="data/in-domain.csv" download>Download CSV</a></div>
+      <div class="benchmark-selection"><span id="benchmark-selection-status" role="status" aria-live="polite">Click a figure point to highlight its row, or click a model row to locate its figure point.</span><button id="locate-benchmark-row" class="subtle-button" hidden>Show highlighted row</button></div>
+      <div id="in-domain-scroll" class="benchmark-scroll" tabindex="0" role="region" aria-label="In-domain benchmark table, scroll horizontally or vertically to see all results"><table id="in-domain-table" class="benchmark-table"><caption class="sr-only">Complete in-domain results. Each benchmark reports mean output tokens and accuracy in percent.</caption><thead><tr><th rowspan="2" scope="col" class="model-column">Model / configuration</th><th colspan="2" scope="colgroup" class="average-group">Average</th><th colspan="2" scope="colgroup">AIME-2025</th><th colspan="2" scope="colgroup">MATH-500</th><th colspan="2" scope="colgroup">AMC</th><th colspan="2" scope="colgroup">OlympiadBench</th><th colspan="2" scope="colgroup">Output cost (USD)</th></tr><tr><th scope="col" class="average-cell">#Tk. ↓</th><th scope="col" class="average-cell">Acc. (%) ↑</th><th scope="col">#Tk. ↓</th><th scope="col">Acc. (%) ↑</th><th scope="col">#Tk. ↓</th><th scope="col">Acc. (%) ↑</th><th scope="col">#Tk. ↓</th><th scope="col">Acc. (%) ↑</th><th scope="col">#Tk. ↓</th><th scope="col">Acc. (%) ↑</th><th scope="col">Price / 1M</th><th scope="col" title="USD per 1,000 responses">Cost / 1K</th></tr></thead><tbody id="in-domain-body"></tbody></table></div>
+      <p class="benchmark-note">#Tk. = mean generated completion tokens per response; Acc. = reported accuracy (%). Rows are grouped as in the paper. Different budgets and reasoning settings are separate configurations; Price / 1M = USD per million output tokens; Cost / 1K responses = domain-specific average #Tk. × price / 1,000. — means unreported or unavailable, never zero. Click a plotted model’s row to return to its highlighted point above; a hidden point is revealed automatically. Rows without a cost estimate have no figure point.</p>
+    </section>
+    <section id="out-of-domain-results" class="benchmark-section" aria-labelledby="out-of-domain-title">
+      <div class="benchmark-heading"><div><h3 id="out-of-domain-title">Out-of-domain</h3><p>MMLU · MMLU-Pro · LSAT · GPQA</p></div><a href="data/out-of-domain.csv" download>Download CSV</a></div>
+      <div id="out-of-domain-scroll" class="benchmark-scroll" tabindex="0" role="region" aria-label="Out-of-domain benchmark table, scroll horizontally or vertically to see all results"><table id="out-of-domain-table" class="benchmark-table"><caption class="sr-only">Complete out-of-domain results. Unreported measurements are shown as an em dash. GPT-5.6 configurations are omitted.</caption><thead><tr><th rowspan="2" scope="col" class="model-column">Model / configuration</th><th colspan="2" scope="colgroup" class="average-group">Average</th><th colspan="2" scope="colgroup">MMLU</th><th colspan="2" scope="colgroup">MMLU-Pro</th><th colspan="2" scope="colgroup">LSAT</th><th colspan="2" scope="colgroup">GPQA</th><th colspan="2" scope="colgroup">Output cost (USD)</th></tr><tr><th scope="col" class="average-cell">#Tk. ↓</th><th scope="col" class="average-cell">Acc. (%) ↑</th><th scope="col">#Tk. ↓</th><th scope="col">Acc. (%) ↑</th><th scope="col">#Tk. ↓</th><th scope="col">Acc. (%) ↑</th><th scope="col">#Tk. ↓</th><th scope="col">Acc. (%) ↑</th><th scope="col">#Tk. ↓</th><th scope="col">Acc. (%) ↑</th><th scope="col">Price / 1M</th><th scope="col" title="USD per 1,000 responses">Cost / 1K</th></tr></thead><tbody id="out-of-domain-body"></tbody></table></div>
+      <p class="benchmark-note">GPT-5.6 Luna, Sol (including every reasoning-effort variant), and Terra are excluded from this table and its export because their MMLU, MMLU-Pro, LSAT, and GPQA evaluation data are unreliable. Other configurations with unreported OOD measurements remain listed with —. Click a plotted model’s row to highlight the same configuration in the figure above, which uses In-domain accuracy and cost. In-domain and Out-of-domain measurements are never combined.</p>
+    </section>
+    
+  </section>
+
+<section id="case-studies" class="paper-section"><div class="paper-section-heading"><h2>Case Studies</h2></div><div class="paper-prose"><p>To complement the quantitative comparisons in the preceding sections, we present five paired case studies drawn from the evaluation outputs of our KL-shaped 8B checkpoint and the matched unshaped 8B base, run on identical prompts under an 8K token budget. We surface two failure modes of the base model that the KL-shaped model consistently avoids. <strong>(A)</strong> exhausting the 8K budget without producing an extractable answer, and <strong>(B)</strong> reaching the same correct answer but spending 3 to 6 <span class="paper-math" data-display="false" data-tex="\times">\times</span> more tokens. For readability each case is laid out on its own page. The green box reports metadata (prompt, ground truth, per-model token counts and correctness), the two gray boxes contain head to tail excerpts of the two responses, and the body text below them analyses what each model did differently.</p></div><div class="case-category-key"><span>A · Budget exhausted / answer extraction failed</span><span>B · Same correct answer, redundant token use</span></div><div class="case-list"><details class="case-card" id="case-a1"><summary><span class="case-category">A1</span><span class="case-title">AIME 2025</span><span class="case-summary">1,897 vs. 8,192 tokens<span>76.8% fewer tokens</span></span><span class="case-expand">+</span></summary><div class="case-content"><div class="case-metadata"><div><span>Ground truth</span><strong>117</strong></div><div><span>KL-shaped 8B</span><strong>1,897 tokens · correct</strong></div><div><span>8B base</span><strong>8,192 tokens · extraction failed</strong></div></div><div class="case-prompt"><h4>Prompt</h4><p>Find the number of ordered pairs <span class="paper-math" data-display="false" data-tex="(x,y)">(x,y)</span>, where both <span class="paper-math" data-display="false" data-tex="x">x</span> and <span class="paper-math" data-display="false" data-tex="y">y</span> are integers between <span class="paper-math" data-display="false" data-tex="-100">-100</span> and <span class="paper-math" data-display="false" data-tex="100">100</span>, inclusive, such that <span class="paper-math" data-display="false" data-tex="12x^{2}-xy-6y^{2}=0">12x^{2}-xy-6y^{2}=0</span>.
+
+Let&#x27;s think step by step and output the final answer within <code>\boxed{}</code>.</p></div><div class="case-responses"><article><h4>Ours — response (excerpt)</h4><pre>&lt;think&gt; 
+
+Okay, so I need to find the number of ordered pairs (x, y) where x and y are integers between -100 and 100 inclusive, and they satisfy the equation 12x{}^{2} - xy - 6y{}^{2} = 0. Hmm, let me start by trying to factor the equation or maybe solve for one variable in terms of the other.
+
+First, let me rewrite the equation: 12x{}^{2} - xy - 6y{}^{2} = 0. Maybe I can treat this as a quadratic in x or y. Let me try treating it as a quadratic in x. So, 12x{}^{2} - yx - 6y{}^{2} = 0. Using the quadratic formula for x:
+
+x = [y ± √(y{}^{2} + 4*12*6y{}^{2})] / (2*12)
+
+Simplify the discriminant: y{}^{2} + 288y{}^{2} = 289y{}^{2}. So sqrt(289y{}^{2}) is 17|y|. Therefore,
+
+x = [y ± 17|y|] / 24.
+
+Hmm, since we are dealing with integers, perhaps we can consider cases based on the sign of y.
+
+Case 1: y ≥ 0. Then |y| = y, so:
+
+x = [y ± 17y]/24.
+
+So two possibilities:
+
+x = (y + 17y)/24 = 18y/24 = 3y/4,
+
+or x = (y - 17y)/24 = (-16y)/24 = -2y/3.
+
+Case 2: y &lt; 0. Then |y| = -y, so:
+
+x = [y ± 17*(-y)] /24.
+
+Which would be:
+
+x = [y ∓ 17y]/24.
+
+So two possibilities:
+
+x = [y - 17y]/24 = (-16y)/24 = -2y/3,
+
+or x = [y + 17y]/24 = 18y/24 = 3y/4.
+
+[... truncated for brevity ...]
+
+---
+
+### Step 2: Adjusting for overlap
+
+The only overlapping solution is $(0, 0)$, which appears in both families. Hence, we subtract 1 to avoid double-counting.
+
+---
+
+### Final Count
+
+$$ 
+
+\text{Total solutions} = 51 + 67 - 1 = \boxed{117} 
+
+$$</pre></article><article><h4>8B base — response (excerpt)</h4><pre>&lt;think&gt; 
+
+Okay, so I need to find the number of ordered pairs (x, y) where both x and y are integers between -100 and 100 inclusive, and they satisfy the equation 12x{}^{2} - xy - 6y{}^{2} = 0. Let me start by trying to understand the equation better.
+
+First, maybe I can factor the equation or rearrange it to make it easier to handle. Let me write down the equation again:
+
+12x{}^{2} - xy - 6y{}^{2} = 0.
+
+Hmm, this looks like a quadratic in terms of x or y. Maybe I can treat it as a quadratic equation in x and solve for x in terms of y, or vice versa. Let me try that.
+
+Let me consider this as a quadratic equation in x. So, rearranged:
+
+12x{}^{2} - xy - 6y{}^{2} = 0.
+
+So, in terms of x, this is:
+
+12x{}^{2} - yx - 6y{}^{2} = 0.
+
+Using the quadratic formula, x = [y ± √(y{}^{2} + 4*12*6y{}^{2})] / (2*12). Let me compute the discriminant:
+
+Discriminant D = y{}^{2} + 4*12*6y{}^{2} = y{}^{2} + 288y{}^{2} = 289y{}^{2}.
+
+[... truncated for brevity ...]
+
+2*(-33) = -66, 2*33 = 66). y ranges from -99 to 99 (since -3m for m from -33 to 33: when m = -33, y = 99; when m = 33, y = -99). Therefore, y is within -100 to 100. Therefore, 67 values. Correct.
+
+Therefore, 51 + 67 - 1 = 117. Therefore, answer is 11</pre></article></div><div class="case-analysis"><p>This AIME problem asks for the number of integer pairs <span class="paper-math" data-display="false" data-tex="(x,y)">(x,y)</span> with both coordinates in <span class="paper-math" data-display="false" data-tex="[-100,100]">[-100,100]</span> that satisfy <span class="paper-math" data-display="false" data-tex="12x^{2}-xy-6y^{2}=0">12x^{2}-xy-6y^{2}=0</span>. The clean way is to factor the quadratic form to obtain the two ray-families <span class="paper-math" data-display="false" data-tex="(3k,4k)">(3k,4k)</span> and <span class="paper-math" data-display="false" data-tex="(-2m,3m)">(-2m,3m)</span>, count lattice points on each family, and subtract the single overlap at the origin — which is exactly what the KL-shaped model does in 1,897 tokens.</p>
+<p>The 8B base spends its budget very differently. It correctly identifies the same factorisation in the first few hundred tokens, but then re-opens the analysis: it splits cases on the sign of <span class="paper-math" data-display="false" data-tex="y">y</span>, repeatedly re-derives the discriminant, double-checks the absolute-value handling, and verifies the lattice counts via several redundant parametrisations. The trace then loops back to re-examine boundary values for <span class="paper-math" data-display="false" data-tex="k">k</span> and <span class="paper-math" data-display="false" data-tex="m">m</span>, never returning to a final closed form. By the time it does state “Therefore, <span class="paper-math" data-display="false" data-tex="51+67-1=117">51+67-1=117</span>&#x27;&#x27; the 8K-token cap has already been hit; the answer is cut mid-token (“answer is 11&#x27;&#x27;) and the extractor returns <code>EXTRACTION_FAILED</code>.</p>
+<p>Qualitatively this is the prototypical truncation failure of the unshaped base on AIME-difficulty problems: the right answer is reachable, the model can even recite it, but the verbose verification habits inflate the trace beyond the budget. The KL-shaped model writes the same proof skeleton with no redundant verification cycles and finishes well inside the budget, which is exactly the behaviour the KL-length shaping was designed to encourage.</p></div></div></details><details class="case-card" id="case-a2"><summary><span class="case-category">A2</span><span class="case-title">Olympiad Bench</span><span class="case-summary">1,667 vs. 8,192 tokens<span>79.7% fewer tokens</span></span><span class="case-expand">+</span></summary><div class="case-content"><div class="case-metadata"><div><span>Ground truth</span><strong>[&#x27;<span class="paper-math" data-display="false" data-tex="f(x)=x,f(x)=-x">f(x)=x,f(x)=-x</span>&#x27;]</strong></div><div><span>KL-shaped 8B</span><strong>1,667 tokens · correct</strong></div><div><span>8B base</span><strong>8,192 tokens · extraction failed</strong></div></div><div class="case-prompt"><h4>Prompt</h4><p>Find all functions <span class="paper-math" data-display="false" data-tex="f: \mathbb{Q} \rightarrow \mathbb{Q}">f: \mathbb{Q} \rightarrow \mathbb{Q}</span> such that the equation
+
+holds for all rational numbers <span class="paper-math" data-display="false" data-tex="x">x</span> and <span class="paper-math" data-display="false" data-tex="y">y</span>.
+
+</p><div class="equation-shell"><div class="paper-math" data-display="true" data-tex="f(x f(x)+y)=f(y)+x^{2}">f(x f(x)+y)=f(y)+x^{2}</div></div><p>
+
+Here, <span class="paper-math" data-display="false" data-tex="\mathbb{Q}">\mathbb{Q}</span> denotes the set of rational numbers. Let&#x27;s think step by step and output the final answer within <code>\boxed{}</code>.</p></div><div class="case-responses"><article><h4>Ours — response (excerpt)</h4><pre>&lt;think&gt; 
+
+Okay, so I need to find all functions f from the rational numbers to the rational numbers that satisfy the equation f(xf(x) + y) = f(y) + x{}^{2} for all rational x and y. Hmm, functional equations can be tricky, but let me try to break it down step by step.
+
+First, maybe I can plug in some specific values for x or y to simplify the equation and get some information about f.
+
+Let me start by trying x = 0. If I set x = 0, the equation becomes f(0*f(0) + y) = f(y) + 0{}^{2}, which simplifies to f(y) = f(y) + 0. So that just gives f(y) = f(y), which is always true. So that doesn&#x27;t give me new information. Hmm.
+
+What if I set y = 0? Then the original equation becomes f(xf(x) + 0) = f(0) + x{}^{2}, so f(xf(x)) = f(0) + x{}^{2}. That seems useful. So f(xf(x)) = f(0) + x{}^{2}. Maybe I can use this later.
+
+Another idea: perhaps assume that f is a polynomial function. Sometimes functional equations have polynomial solutions. Let me suppose that f is a polynomial. Let&#x27;s assume f(x) is a polynomial with rational coefficients.
+
+[... truncated for brevity ...]
+
+- For $ f(x) = -x $, the left-hand side becomes $ x^2 - y $, and the right-hand side is $ -y + x^2 $, which also matches.
+
+---
+
+### Final Answer
+
+$$ 
+
+\boxed{f(x) = x} \quad \text{and} \quad \boxed{f(x) = -x} 
+
+$$</pre></article><article><h4>8B base — response (excerpt)</h4><pre>&lt;think&gt; 
+
+Okay, so I need to find all functions $ f: \mathbb{Q} \rightarrow \mathbb{Q} $ that satisfy the equation $ f(x f(x) + y) = f(y) + x^2 $ for all rational numbers $ x $ and $ y $. Hmm, functional equations can be tricky, but let me take it step by step.
+
+First, maybe I should try plugging in some specific values for $ x $ or $ y $ to see if I can find some properties of $ f $.
+
+Let me start by setting $ y = 0 $. Then the equation becomes:
+
+$ f(x f(x) + 0) = f(0) + x^2 $
+
+Which simplifies to:
+
+$ f(x f(x)) = f(0) + x^2 $
+
+Hmm, interesting. So this relates the value of the function at $ x f(x) $ to $ f(0) $ and $ x^2 $. Maybe I can use this later.
+
+What if I set $ x = 0 $? Let me try that. Then the original equation becomes:
+
+$ f(0 \cdot f(0) + y) = f(y) + 0^2 $
+
+Simplifying:
+
+$ f(y) = f(y) + 0 $
+
+[... truncated for brevity ...]
+
+Alternatively, set $ y = 0 $: $ f(c) = f(0) + 1 $, which is also known.
+
+Now, let me try to find $ f $ at $ x = -1 $. Let me denote $ d = f(-1) $. Let me see if I can relate this to other values.
+
+From the original equation, set $ x = -1 $, $ y =</pre></article></div><div class="case-analysis"><p>The Olympiad Bench problem here is a classical Cauchy-style functional equation: find all <span class="paper-math" data-display="false" data-tex="f:\mathbb{Q}\to\mathbb{Q}">f:\mathbb{Q}\to\mathbb{Q}</span> with <span class="paper-math" data-display="false" data-tex="f(xf(x)+y)=f(y)+x^{2}">f(xf(x)+y)=f(y)+x^{2}</span>. The expected ground truth is the pair <span class="paper-math" data-display="false" data-tex="\{f(x)=x,\ f(x)=-x\}">\{f(x)=x,\ f(x)=-x\}</span>, recovered by assuming a polynomial form, balancing degrees, and reading off <span class="paper-math" data-display="false" data-tex="a^{2}=1">a^{2}=1</span>.</p>
+<p>Our KL-shaped model executes this argument compactly in 1,667 tokens: it tries <span class="paper-math" data-display="false" data-tex="x=0">x=0</span> and <span class="paper-math" data-display="false" data-tex="y=0">y=0</span> to extract the relation <span class="paper-math" data-display="false" data-tex="f(xf(x))=f(0)+x^{2}">f(xf(x))=f(0)+x^{2}</span>, assumes <span class="paper-math" data-display="false" data-tex="f">f</span> is linear of degree 1, substitutes <span class="paper-math" data-display="false" data-tex="f(x)=ax+b">f(x)=ax+b</span>, and arrives at <span class="paper-math" data-display="false" data-tex="a^{2}=1">a^{2}=1</span>, <span class="paper-math" data-display="false" data-tex="b=0">b=0</span>. It then verifies both branches against the original equation. The final boxed answer reports <span class="paper-math" data-display="false" data-tex="f(x)=-x">f(x)=-x</span> (and earlier in the trace also <span class="paper-math" data-display="false" data-tex="f(x)=x">f(x)=x</span>), so a strict matcher only credits one branch; this still counts as a qualitative truncation win because the base model produces no extractable answer at all on the same prompt.</p>
+<p>The 8B base, in contrast, exhausts its 8K budget on a long substitution loop. It tries <span class="paper-math" data-display="false" data-tex="y=0">y=0</span>, <span class="paper-math" data-display="false" data-tex="x=0">x=0</span>, <span class="paper-math" data-display="false" data-tex="x=y=0">x=y=0</span>, <span class="paper-math" data-display="false" data-tex="y=-c">y=-c</span>, <span class="paper-math" data-display="false" data-tex="y=0">y=0</span> again with <span class="paper-math" data-display="false" data-tex="c=f(0)">c=f(0)</span>, and various ad-hoc substitutions trying to force injectivity or surjectivity — but never commits to the polynomial-degree argument. The trace is cut mid-substitution at <span class="paper-math" data-display="false" data-tex="x=-1">x=-1</span>, so the extractor again returns failure. The contrast illustrates a second failure mode of the base: not just verbose, but also strategically directionless under tight budgets, repeatedly probing the same special values rather than escalating to a structural ansatz.</p></div></div></details><details class="case-card" id="case-b1"><summary><span class="case-category">B1</span><span class="case-title">AMC</span><span class="case-summary">1,339 vs. 7,434 tokens<span>82.0% fewer tokens</span></span><span class="case-expand">+</span></summary><div class="case-content"><div class="case-metadata"><div><span>Ground truth</span><strong>6.0</strong></div><div><span>KL-shaped 8B</span><strong>1,339 tokens · correct</strong></div><div><span>8B base</span><strong>7,434 tokens · correct</strong></div></div><div class="case-prompt"><h4>Prompt</h4><p>The least common multiple of a positive integer <span class="paper-math" data-display="false" data-tex="n">n</span> and <span class="paper-math" data-display="false" data-tex="18">18</span> is <span class="paper-math" data-display="false" data-tex="180">180</span>, and the greatest common divisor of <span class="paper-math" data-display="false" data-tex="n">n</span> and <span class="paper-math" data-display="false" data-tex="45">45</span> is <span class="paper-math" data-display="false" data-tex="15">15</span>. What is the sum of the digits of <span class="paper-math" data-display="false" data-tex="n">n</span>? Let&#x27;s think step by step and output the final answer within <code>\boxed{}</code>.</p></div><div class="case-responses"><article><h4>Ours — response</h4><pre>&lt;think&gt; 
+
+Okay, so I need to find the sum of the digits of n, given two conditions: the least common multiple of n and 18 is 180, and the greatest common divisor of n and 45 is 15. Hmm, let me start by recalling some number theory concepts.
+
+First, LCM and GCD relationships. I remember that for any two numbers a and b, LCM(a,b) * GCD(a,b) = a*b. Maybe that will come in handy.
+
+Given that LCM(n, 18) = 180. So, LCM(n, 18) = 180. Also, GCD(n, 45) = 15.
+
+Let me start with the LCM condition. Let&#x27;s factorize the numbers involved. 18 is 2 * 3^2, and 180 is 2^2 * 3^2 * 5. 
+
+Since LCM(n, 18) = 180, then n must be a divisor of 180, right? Because the LCM of n and 18 is 180, so n has to divide 180. Also, the LCM takes the highest powers of primes present in either number.
+
+So, let&#x27;s think about the prime factors of n. Since LCM(n, 18) is 180, which has primes 2, 3, 5. 
+
+18 has 2^1, 3^2. So, for the LCM to have 2^2, either n has 2^2 or 18 has it, but 18 only has 2^1, so n must have 2^2. Similarly, for 3^2, since 18 has 3^2, so maybe n doesn&#x27;t need to have 3^2. But for the 5, since 18 doesn&#x27;t have 5, then n must have 5^1. 
+
+Therefore, n must have factors 2^2, 5^1, and possibly 3^something. But since LCM(n, 18) is 180, which has 3^2, and 18 has 3^2, so n can have 3^0, 3^1, or 3^2. But since GCD(n, 45) is 15. Let&#x27;s check the GCD condition.
+
+45 is 3^2 * 5. GCD(n, 45) = 15 = 3 * 5. Therefore, n must have 3^1 and 5^1, but not higher powers of 3 or 5. Because if n had 3^2, then GCD(n,45) would be 3^2 *5 = 45, which is not 15. Similarly, if n had 5^2, then GCD would have 5^1 (since 45 has 5^1), so that&#x27;s okay. Wait, but GCD(n,45) is 15, which is 3*5. So, n must have 3^1 and 5^1, but not higher powers of 3 or 5. Therefore, n can&#x27;t have 3^2 or 5^2.
+
+Therefore, putting this together, n has 2^2, 3^1, 5^1. Therefore, n = 4 * 3 * 5 = 60. Let me check if this satisfies the conditions.
+
+Check LCM(60, 18). 60 is 2^2 * 3 * 5, 18 is 2 * 3^2. LCM would take max exponents: 2^2, 3^2, 5^1. Which is 4 * 9 *5 = 180. Yes, that&#x27;s correct.
+
+Check GCD(60,45). 60 is 2^2 *3 *5, 45 is 3^2 *5. GCD is min exponents: 3^1 *5^1 = 15. Perfect. So n is 60.
+
+Therefore, the sum of the digits of n is 6 + 0 = \boxed{6}. 
+
+&lt;/think&gt;
+
+To solve the problem, we analyze the two given conditions:
+
+1. **LCM(n, 18) = 180** 
+
+2. **GCD(n, 45) = 15**
+
+---
+
+### Step 1: Factorization and Prime Components
+
+- $ 18 = 2 \times 3^2 $ 
+
+- $ 180 = 2^2 \times 3^2 \times 5 $ 
+
+- $ 45 = 3^2 \times 5 $
+
+---
+
+### Step 2: Use LCM Condition
+
+Since LCM(n, 18) = 180, n must have the prime factors that make the LCM equal to 180. From this, we deduce: 
+
+- n must include $ 2^2 $ (to match the LCM&#x27;s $ 2^2 $) 
+
+- n must include $ 5 $ (since 18 doesn&#x27;t have 5) 
+
+- n can have up to $ 3^2 $, but not more than that (to keep LCM at $ 3^2 $)
+
+So, n must include $ 2^2 \times 5 \times 3 $
+
+---
+
+### Step 3: Use GCD Condition
+
+Given GCD(n, 45) = 15, and 45 = $ 3^2 \times 5 $, we deduce: 
+
+- n must have $ 3 $ and $ 5 $, but **not** $ 3^2 $ or $ 5^2 $
+
+Therefore, n must be $ 2^2 \times 3 \times 5 = 4 \times 3 \times 5 = 60 $
+
+---
+
+### Step 4: Sum of Digits
+
+The digits of 60 are 6 and 0. Their sum is:
+
+$$ 
+
+\boxed{6} 
+
+$$</pre></article><article><h4>8B base — response (excerpt)</h4><pre>&lt;think&gt; 
+
+Okay, so I need to find a positive integer n such that the least common multiple of n and 18 is 180, and the greatest common divisor of n and 45 is 15. Then, I have to find the sum of the digits of n. Let me try to break this down step by step.
+
+First, let me recall what least common multiple (LCM) and greatest common divisor (GCD) mean. The LCM of two numbers is the smallest number that both numbers divide into, and the GCD is the largest number that divides both numbers. Also, there&#x27;s a relationship between LCM and GCD: for any two positive integers a and b, LCM(a, b) * GCD(a, b) = a * b. Maybe that will come in handy here.
+
+So, the problem gives me two conditions:
+
+1. LCM(n, 18) = 180 
+
+2. GCD(n, 45) = 15
+
+I need to find n that satisfies both these conditions. Let me tackle them one by one.
+
+[... truncated for brevity ...]
+
+So $ n = 60 $ satisfies both conditions.
+
+---
+
+### Step 5: Compute the Sum of the Digits of $ n $
+
+The digits of $ n = 60 $ are **6** and **0**.
+
+$$ 
+
+\text{Sum of digits} = 6 + 0 = \boxed{6} 
+
+$$
+
+---
+
+### Final Answer
+
+$$ 
+
+\boxed{6} 
+
+$$</pre></article></div><div class="case-analysis"><p>On this AMC number-theory problem (find <span class="paper-math" data-display="false" data-tex="n">n</span> with <span class="paper-math" data-display="false" data-tex="\mathrm{lcm}(n,18)=180">\mathrm{lcm}(n,18)=180</span> and <span class="paper-math" data-display="false" data-tex="\gcd(n,45)=15">\gcd(n,45)=15</span>, then sum the digits of <span class="paper-math" data-display="false" data-tex="n">n</span>), both models reach the correct answer of 6. The arithmetic chain is short: factor <span class="paper-math" data-display="false" data-tex="18,45,180">18,45,180</span> into primes, read the LCM constraint as <span class="paper-math" data-display="false" data-tex="n">n</span> contributing the missing <span class="paper-math" data-display="false" data-tex="2^{2}">2^{2}</span> and a factor of <span class="paper-math" data-display="false" data-tex="5">5</span>, read the GCD constraint as <span class="paper-math" data-display="false" data-tex="n">n</span> contributing exactly <span class="paper-math" data-display="false" data-tex="3^{1}\cdot 5^{1}">3^{1}\cdot 5^{1}</span>, conclude <span class="paper-math" data-display="false" data-tex="n=2^{2}\cdot 3\cdot 5=60">n=2^{2}\cdot 3\cdot 5=60</span>, sum the digits.</p>
+<p>The KL-shaped model executes that chain end-to-end in 1,339 tokens with one explicit verification at the end. The 8B base needs 7,434 tokens to do the same work — a <span class="paper-math" data-display="false" data-tex="5.5\times">5.5\times</span> inflation. Inspecting its trace, the base model: (i) recomputes the same prime factorisations multiple times, (ii) re-derives the LCM/GCD constraints from the relation <span class="paper-math" data-display="false" data-tex="\mathrm{lcm}\cdot\gcd=ab">\mathrm{lcm}\cdot\gcd=ab</span> even though it then also derives them combinatorially from prime exponents, (iii) explores hypothetical alternative forms of <span class="paper-math" data-display="false" data-tex="n">n</span> that the constraints already rule out, and (iv) rewrites the verification step in three different fractional and prime-factor forms.</p>
+<p>None of these extra detours improve the final answer; they purely consume budget. This is the canonical Category-B pattern: the base model is fluent enough to find the correct path quickly but lacks a stopping discipline once it is found. The KL-shaping reward directly penalises this redundancy, and the resulting model produces a single tight chain of reasoning instead.</p></div></div></details><details class="case-card" id="case-b2"><summary><span class="case-category">B2</span><span class="case-title">MATH</span><span class="case-summary">685 vs. 3,243 tokens<span>78.9% fewer tokens</span></span><span class="case-expand">+</span></summary><div class="case-content"><div class="case-metadata"><div><span>Ground truth</span><strong>12</strong></div><div><span>KL-shaped 8B</span><strong>685 tokens · correct</strong></div><div><span>8B base</span><strong>3,243 tokens · correct</strong></div></div><div class="case-prompt"><h4>Prompt</h4><p>Simplify: <span class="paper-math" data-display="false" data-tex="\frac{\sqrt{2.5^2-0.7^2}}{2.7-2.5}">\frac{\sqrt{2.5^2-0.7^2}}{2.7-2.5}</span>. Let&#x27;s think step by step and output the final answer within <code>\boxed{}</code>.</p></div><div class="case-responses"><article><h4>Ours — response</h4><pre>&lt;think&gt; 
+
+Okay, so I need to simplify this expression: the square root of (2.5 squared minus 0.7 squared) divided by (2.7 minus 2.5). Let me write that down to visualize it better.
+
+First, let me handle the numerator: √(2.5{}^{2} - 0.7{}^{2}). Hmm, maybe I can simplify the expression inside the square root first. Remember, a{}^{2} - b{}^{2} is (a - b)(a + b). Let me try that.
+
+So, 2.5{}^{2} - 0.7{}^{2} would be (2.5 - 0.7)(2.5 + 0.7). Let me calculate those values.
+
+2.5 - 0.7 is 1.8, and 2.5 + 0.7 is 3.2. Therefore, the numerator becomes √(1.8 * 3.2). Let me compute 1.8 * 3.2. 
+
+1.8 * 3.2: Well, 1.8*3 = 5.4 and 1.8*0.2 = 0.36, so total is 5.4 + 0.36 = 5.76. Therefore, the numerator is √5.76.
+
+What&#x27;s the square root of 5.76? Let me think. 2.4 squared is 5.76 because 2.4*2.4 = 5.76. So, √5.76 = 2.4. Therefore, the numerator simplifies to 2.4.
+
+Now the denominator is 2.7 - 2.5, which is 0.2.
+
+Therefore, the entire expression simplifies to 2.4 / 0.2. Dividing by 0.2 is the same as multiplying by 5, so 2.4 * 5 = 12. 
+
+Therefore, the simplified result is 12. So, the final answer is \boxed{12}. 
+
+&lt;/think&gt;
+
+To simplify the expression:
+
+$$ 
+
+\frac{\sqrt{2.5^2 - 0.7^2}}{2.7 - 2.5} 
+
+$$
+
+---
+
+### Step 1: Simplify the numerator
+
+We start with the expression inside the square root:
+
+$$ 
+
+2.5^2 - 0.7^2 
+
+$$
+
+This is a difference of squares, which factors as:
+
+$$ 
+
+(2.5 - 0.7)(2.5 + 0.7) = (1.8)(3.2) 
+
+$$
+
+$$ 
+
+1.8 \times 3.2 = 5.76 
+
+$$
+
+So the numerator becomes:
+
+$$ 
+
+\sqrt{5.76} = 2.4 
+
+$$
+
+---
+
+### Step 2: Simplify the denominator
+
+$$ 
+
+2.7 - 2.5 = 0.2 
+
+$$
+
+---
+
+### Step 3: Final calculation
+
+Now divide the simplified numerator by the denominator:
+
+$$ 
+
+\frac{2.4}{0.2} = 12 
+
+$$
+
+---
+
+### Final Answer:
+
+$$ 
+
+\boxed{12} 
+
+$$</pre></article><article><h4>8B base — response (excerpt)</h4><pre>&lt;think&gt; 
+
+Okay, so I need to simplify this expression: the square root of (2.5 squared minus 0.7 squared) divided by (2.7 minus 2.5). Let me write that down first to make sure I have it right. 
+
+So, the expression is √(2.5{}^{2} - 0.7{}^{2}) divided by (2.7 - 2.5). Let me parse that. The numerator is the square root of (2.5 squared minus 0.7 squared), and the denominator is 2.7 minus 2.5. Alright. 
+
+First, maybe I should compute the numerator and the denominator separately and then divide them. Let me start with the denominator because that seems simpler. 
+
+Denominator: 2.7 minus 2.5. Let me subtract those. 2.7 minus 2.5... Well, 2.7 minus 2.5 is 0.2. That&#x27;s straightforward. So the denominator is 0.2. 
+
+[... truncated for brevity ...]
+
+$$ 
+
+\frac{27}{10} - \frac{5}{2} = \frac{27}{10} - \frac{25}{10} = \frac{2}{10} = \frac{1}{5} 
+
+$$
+
+Now divide:
+
+$$ 
+
+\frac{2.4}{0.2} = \frac{12}{5} \div \frac{1}{5} = \frac{12}{5} \times \frac{5}{1} = 12 
+
+$$
+
+---
+
+### **Final Answer**
+
+$$ 
+
+\boxed{12} 
+
+$$</pre></article></div><div class="case-analysis"><p>This MATH problem asks to simplify <span class="paper-math" data-display="false" data-tex="\frac{\sqrt{2.5^{2}-0.7^{2}}}{2.7-2.5}">\frac{\sqrt{2.5^{2}-0.7^{2}}}{2.7-2.5}</span>. The shortest route is the difference-of-squares identity: <span class="paper-math" data-display="false" data-tex="2.5^{2}-0.7^{2}=(2.5-0.7)(2.5+0.7)=1.8\cdot 3.2=5.76">2.5^{2}-0.7^{2}=(2.5-0.7)(2.5+0.7)=1.8\cdot 3.2=5.76</span>, <span class="paper-math" data-display="false" data-tex="\sqrt{5.76}=2.4">\sqrt{5.76}=2.4</span>, <span class="paper-math" data-display="false" data-tex="2.7-2.5=0.2">2.7-2.5=0.2</span>, and <span class="paper-math" data-display="false" data-tex="2.4/0.2=12">2.4/0.2=12</span>.</p>
+<p>Our KL-shaped model takes that route directly in 685 tokens. The 8B base produces the correct answer of 12 in 3,243 tokens (a <span class="paper-math" data-display="false" data-tex="4.7\times">4.7\times</span> inflation) by computing <span class="paper-math" data-display="false" data-tex="2.5^{2}=6.25">2.5^{2}=6.25</span> and <span class="paper-math" data-display="false" data-tex="0.7^{2}=0.49">0.7^{2}=0.49</span> first, then <span class="paper-math" data-display="false" data-tex="6.25-0.49=5.76">6.25-0.49=5.76</span>, then <span class="paper-math" data-display="false" data-tex="\sqrt{5.76}=2.4">\sqrt{5.76}=2.4</span>, then redoing the same computation a second time using fractions (<span class="paper-math" data-display="false" data-tex="25/4">25/4</span> and <span class="paper-math" data-display="false" data-tex="49/100">49/100</span>, common denominator <span class="paper-math" data-display="false" data-tex="625/100-49/100=576/100">625/100-49/100=576/100</span>, <span class="paper-math" data-display="false" data-tex="\sqrt{576/100}=24/10">\sqrt{576/100}=24/10</span>), and finally also redoing the denominator as <span class="paper-math" data-display="false" data-tex="27/10-25/10=2/10=1/5">27/10-25/10=2/10=1/5</span> before dividing.</p>
+<p>The two routes are mathematically equivalent and the base ultimately gets the same boxed answer, but the trace shows the same content recomputed twice. Even on textbook MATH problems — where the unshaped base is nominally accurate — it pays a <span class="paper-math" data-display="false" data-tex="\sim 5\times">\sim 5\times</span> token tax for these defensive recomputations. The KL-shaped model has internalised that the difference-of-squares factoring is sufficient on first pass, and stops there.</p></div></div></details><details class="case-card" id="case-b3"><summary><span class="case-category">B3</span><span class="case-title">AIME 2025</span><span class="case-summary">947 vs. 3,702 tokens<span>74.4% fewer tokens</span></span><span class="case-expand">+</span></summary><div class="case-content"><div class="case-metadata"><div><span>Ground truth</span><strong>70</strong></div><div><span>KL-shaped 8B</span><strong>947 tokens · correct</strong></div><div><span>8B base</span><strong>3,702 tokens · correct</strong></div></div><div class="case-prompt"><h4>Prompt</h4><p>Find the sum of all integer bases <span class="paper-math" data-display="false" data-tex="b&gt;9">b&gt;9</span> for which <span class="paper-math" data-display="false" data-tex="17_{b}">17_{b}</span> is a divisor of <span class="paper-math" data-display="false" data-tex="97_{b}">97_{b}</span>.
+
+Let&#x27;s think step by step and output the final answer within <code>\boxed{}</code>.</p></div><div class="case-responses"><article><h4>Ours — response</h4><pre>&lt;think&gt; 
+
+Okay, so I need to find all integer bases b &gt; 9 where 17 base b divides 97 base b. Then sum those bases. Hmm. Let me start by converting these numbers from base b to decimal.
+
+First, 17_b is 1*b + 7 = b + 7.
+
+Similarly, 97_b is 9*b + 7 = 9b + 7.
+
+So the problem says that (b + 7) divides (9b + 7). So, (b + 7) | (9b + 7). 
+
+To find when b + 7 divides 9b + 7, I can use the division algorithm or look at the remainder. If b + 7 divides 9b + 7, then 9b + 7 must be a multiple of b + 7.
+
+Another approach is to express 9b + 7 in terms of b + 7. Let me perform the division or find the remainder when 9b +7 is divided by b +7.
+
+Let me write 9b +7 as 9(b +7) - 9*7 +7. Let&#x27;s check:
+
+9(b +7) = 9b +63. So, 9b +7 = 9(b +7) -63 +7 = 9(b +7) -56.
+
+Therefore, 9b +7 = 9(b +7) -56. Therefore, the remainder when 9b +7 is divided by b +7 is -56. But since we want divisibility, the remainder must be zero. Therefore, -56 ≡ 0 mod (b +7). Which implies that b +7 divides 56.
+
+Therefore, b +7 is a positive divisor of 56. Since b &gt;9, then b +7 &gt; 16. So, we need to find all divisors of 56 that are greater than 16, then subtract 7 to get b.
+
+First, list all positive divisors of 56: 1, 2, 4, 7, 8, 14, 28, 56.
+
+Now, which of these are greater than 16? 28 and 56.
+
+Therefore, b +7 = 28 =&gt; b = 21, or b +7 =56 =&gt; b=49.
+
+Thus, the valid bases are 21 and 49. Therefore, the sum is 21 + 49 = 70.
+
+Therefore, the answer is \boxed{70}. 
+
+&lt;/think&gt;
+
+To solve the problem, we are asked to find the sum of all integer bases $ b &gt; 9 $ for which $ 17_b $ divides $ 97_b $.
+
+---
+
+### Step 1: Convert to Decimal 
+
+We interpret the numbers in base $ b $:
+
+- $ 17_b = 1 \cdot b + 7 = b + 7 $ 
+
+- $ 97_b = 9 \cdot b + 7 = 9b + 7 $
+
+We are looking for bases $ b &gt; 9 $ such that $ b + 7 $ divides $ 9b + 7 $.
+
+---
+
+### Step 2: Use Divisibility Condition 
+
+We express $ 9b + 7 $ in terms of $ b + 7 $:
+
+$$ 
+
+9b + 7 = 9(b + 7) - 56 
+
+$$
+
+This implies that the remainder when $ 9b + 7 $ is divided by $ b + 7 $ is $ -56 $, or equivalently, $ 56 $.
+
+So, $ b + 7 $ must divide 56.
+
+---
+
+### Step 3: Find Valid Bases 
+
+List the positive divisors of 56:   
+
+$$ 
+
+1, 2, 4, 7, 8, 14, 28, 56 
+
+$$
+
+We are only interested in divisors greater than 16 (since $ b &gt; 9 \Rightarrow b + 7 &gt; 16 $):
+
+- $ b + 7 = 28 \Rightarrow b = 21 $ 
+
+- $ b + 7 = 56 \Rightarrow b = 49 $
+
+---
+
+### Step 4: Sum the Valid Bases 
+
+$$ 
+
+21 + 49 = \boxed{70} 
+
+$$</pre></article><article><h4>8B base — response (excerpt)</h4><pre>&lt;think&gt; 
+
+Okay, so I need to find all integer bases b greater than 9 where the number 17 in base b divides the number 97 in base b. Then, I have to sum all those bases. Hmm, let me start by recalling how numbers in different bases work.
+
+First, I remember that when a number is written in base b, each digit represents a power of b. So, for example, the number 17 in base b is equal to 1 times b squared plus 7 times b to the first power? Wait, no, wait. Wait, 17 in base b is actually 1*b^1 + 7*b^0, right? Because the rightmost digit is the units place (b^0), then the next is b^1, etc. So 17_b is 1*b + 7. Similarly, 97_b is 9*b + 7. So the problem is saying that 1*b + 7 divides 9*b + 7. So, mathematically, we can write that as:
+
+(9b + 7) divided by (b + 7) must be an integer. So, (9b + 7) / (b + 7) is an integer. And we need to find all integers b &gt; 9 for which this is true, then sum them up.
+
+[... truncated for brevity ...]
+
+  $ 97_{49} = 9 \cdot 49 + 7 = 441 + 7 = 448 $   
+
+  $ 448 \div 56 = 8 $ → integer (yes)
+
+Both bases satisfy the condition.
+
+---
+
+### Step 5: Sum the valid bases
+
+$$ 
+
+21 + 49 = \boxed{70} 
+
+$$
+
+---
+
+### Final Answer
+
+$$ 
+
+\boxed{70} 
+
+$$</pre></article></div><div class="case-analysis"><p>This AIME 2025 problem asks for the sum of all integer bases <span class="paper-math" data-display="false" data-tex="b&gt;9">b&gt;9</span> for which <span class="paper-math" data-display="false" data-tex="17_{b}\mid 97_{b}">17_{b}\mid 97_{b}</span>. Decoded into base 10, this becomes <span class="paper-math" data-display="false" data-tex="(b+7)\mid(9b+7)">(b+7)\mid(9b+7)</span>. Writing <span class="paper-math" data-display="false" data-tex="9b+7=9(b+7)-56">9b+7=9(b+7)-56</span> shows that <span class="paper-math" data-display="false" data-tex="(b+7)\mid 56">(b+7)\mid 56</span>, so <span class="paper-math" data-display="false" data-tex="b+7\in\{28,56\}">b+7\in\{28,56\}</span> (the only divisors of <span class="paper-math" data-display="false" data-tex="56">56</span> exceeding <span class="paper-math" data-display="false" data-tex="16">16</span>), giving <span class="paper-math" data-display="false" data-tex="b\in\{21,49\}">b\in\{21,49\}</span> and a sum of <span class="paper-math" data-display="false" data-tex="70">70</span>.</p>
+<p>Our KL-shaped model executes that derivation in 947 tokens: convert, rewrite the divisibility, list divisors of <span class="paper-math" data-display="false" data-tex="56">56</span>, filter by <span class="paper-math" data-display="false" data-tex="b+7&gt;16">b+7&gt;16</span>, sum. The 8B base reaches the same answer of <span class="paper-math" data-display="false" data-tex="70">70</span> in 3,702 tokens (<span class="paper-math" data-display="false" data-tex="3.9\times">3.9\times</span> longer) by additionally performing polynomial long division of <span class="paper-math" data-display="false" data-tex="9b+7">9b+7</span> by <span class="paper-math" data-display="false" data-tex="b+7">b+7</span> to re-derive the remainder of <span class="paper-math" data-display="false" data-tex="-56">-56</span>, then re-deriving the same fact via modular arithmetic, then tabulating each candidate divisor and re-checking it against the original <span class="paper-math" data-display="false" data-tex="b&gt;9">b&gt;9</span> condition individually, then verifying each surviving <span class="paper-math" data-display="false" data-tex="b\in\{21,49\}">b\in\{21,49\}</span> by recomputing <span class="paper-math" data-display="false" data-tex="17_{b}">17_{b}</span> and <span class="paper-math" data-display="false" data-tex="97_{b}">97_{b}</span> explicitly and dividing the resulting decimal numbers.</p>
+<p>The base&#x27;s verification scaffold is internally consistent and yields the correct answer, but it is largely orthogonal to producing the answer — it is a reasonability check that the KL-shaped model has learned to omit when not needed. The 3.9<span class="paper-math" data-display="false" data-tex="\times">\times</span> reduction here is at the small end of the Category-B examples; on harder problems (cf. Cases A1–A2) the same verbose habit drives the base past the 8K cap entirely.</p></div></div></details></div></section><section id="budget-analysis" class="paper-section"><div class="paper-section-heading"><h2>Scenario Analysis Under an Unlimited Token Budget</h2></div><div class="paper-prose"><p>To examine how token-budget constraints affect reasoning performance, we conduct a <em>token budget gradient analysis</em> on six models originally evaluated without fixed token limits: Step-Flash-196B-11B, Hunyuan3-295B-21B, Qwen-3.6-Plus, GLM-Air-106B-12B, Qwen3-Next-80B-3B, and Gemini-3-Flash.
+These models span both open-source MoE architectures and closed-API services.
+We impose token budgets of 1K, 2K, 4K, 8K, 16K, and 32K on top of the unlimited (256K) baseline, and measure the resulting accuracy degradation across all four mathematical reasoning benchmarks.</p>
+<p>For the unlimited setting, we set the maximum completion length to 256K tokens, which in practice imposes no effective constraint on any model.
+For each simulated budget level <span class="paper-math" data-display="false" data-tex="B \in \{\text{1K}, \text{2K}, \text{4K}, \text{8K}, \text{16K}, \text{32K}\}">B \in \{\text{1K}, \text{2K}, \text{4K}, \text{8K}, \text{16K}, \text{32K}\}</span>, we apply the following post-hoc protocol to the unlimited generations.
+(1) if a sample&#x27;s <code>completion_tokens</code> exceeds <span class="paper-math" data-display="false" data-tex="B">B</span>, we mark it as incorrect and cap its token count at <span class="paper-math" data-display="false" data-tex="B">B</span> for the purpose of computing average token usage.
+(2) otherwise, we retain the original correctness label and token count unchanged.
+This post-hoc approach ensures fair comparison across budget levels, since all evaluations are derived from the same set of underlying model generations, isolating the pure effect of the token budget constraint from any variation in decoding behavior.</p></div><figure id="figure-unlimited" class="unlimited-figure" aria-labelledby="unlimited-title">
+  <div class="unlimited-heading">
+    <div><span class="section-kicker">Interactive budget gradient</span><h3 id="unlimited-title">How accuracy changes with the token budget</h3></div>
+    <button type="button" id="unlimited-reset" class="subtle-button">Reset view</button>
+  </div>
+  <div id="unlimited-legend" class="legend" aria-label="Show or hide models in all five plots"></div>
+  <div class="unlimited-budget-control">
+    <label for="unlimited-budget">Inspect budget <output id="unlimited-budget-value" for="unlimited-budget">8K</output></label>
+    <input id="unlimited-budget" type="range" min="0" max="6" step="1" value="3" aria-valuetext="8K simulated token cap">
+    <div class="unlimited-budget-stops" aria-hidden="true"><span>1K</span><span>2K</span><span>4K</span><span>8K</span><span>16K</span><span>32K</span><span>256K</span></div>
+  </div>
+  <p class="unlimited-instructions">Hover to compare all visible models at a budget. Click a point or a model in the values table to highlight its exact result below. Use the slider, or focus a plot and press ← / →, to inspect the same budget across all five plots.</p>
+  <div id="unlimited-charts" class="unlimited-chart-grid"></div>
+  <p id="unlimited-selection" class="unlimited-selection" role="status" aria-live="polite">Inspecting 8K across all five plots.</p>
+  <figcaption><strong>Token budget gradient analysis for six reasoning models.</strong> (a) Average across four benchmarks. (b) AIME-2025. (c) MATH-500. (d) AMC. (e) OlympiadBench. Hollow markers show simulated caps; solid markers show the unlimited 256K baseline. Dashed lines connect the seven reported observations. Budget positions are equally spaced categories. All 210 points are drawn directly from the original numerical tables.</figcaption>
+</figure>
+<details class="budget-source-analysis"><summary>Analysis</summary><div class="paper-prose"><p>As shown in Fig. <a href="#figure-unlimited">unlimited gradient</a> and Tables <a href="#budget-results">256K</a> to <a href="#budget-results">1K</a>, all six models perform strongly under the unlimited setting, with average accuracies ranging from 87.3% (Step-Flash-196B-11B) to 92.2% (Qwen-3.6-Plus).
+When the token budget is tightened, however, accuracy drops substantially and the degradation rate varies markedly across models.
+This pattern highlights a practical tension in deploying reasoning models: the latent reasoning traces that support high accuracy also incur substantial token cost, while hard token budgets introduced for cost control can directly reduce reasoning quality.</p>
+<p><strong>Token efficiency determines resilience to budget constraints.</strong>
+The six models span a wide range of token consumption at unlimited, from 4,844 (Gemini-3-Flash) to 18,099 (Qwen-3.6-Plus) average tokens.
+This spread is closely reflected in their sensitivity to tighter budgets.
+Gemini-3-Flash, consuming roughly one-quarter the tokens of Qwen-3.6-Plus while achieving a comparable 91.4% accuracy (Tab. <a href="#budget-results">256K</a>), retains 91.4% at 32K, 90.4% at 16K, and still 73.8% at 8K (Tab. <a href="#budget-results">8K</a>).
+In contrast, Qwen-3.6-Plus drops from 92.2% to 80.0% at 32K, 55.9% at 16K, and 38.5% at 8K.
+Qwen3-Next-80B-3B (8,619 tokens, moderate usage) shows a more gradual degradation pattern (88.0% at 32K, 77.3% at 16K, 60.2% at 8K), whereas the more verbose GLM-Air-106B-12B (12,125 tokens) and Step-Flash-196B-11B (13,907 tokens) degrade more steeply.
+Taken together, these comparisons suggest that robustness under budget constraints is more closely aligned with unlimited token usage than with unlimited accuracy, so models with more concise reasoning traces tend to degrade more gracefully.</p></div></details><details class="budget-fixed-comparison"><summary>Compare models at a fixed cap · tokens &amp; output cost</summary><div class="budget-interactive"><div class="budget-controls"><label>Benchmark<select id="budget-metric"><option value="average">Average · all four benchmarks</option><option value="AIME-2025">AIME-2025</option><option value="MATH-500">MATH-500</option><option value="AMC">AMC</option><option value="OlympiadBench">OlympiadBench</option></select></label><label>Horizontal axis<select id="budget-axis"><option value="tokens">Mean output tokens</option><option value="cost">Estimated output cost / 1K responses</option></select></label><button id="budget-reset" class="subtle-button">Reset charts</button></div><div id="budget-legend" class="legend" aria-label="Toggle models across all budget charts"></div><p class="budget-interaction-note">Each panel holds one cap fixed; its horizontal range adapts to the displayed data. Compare the six models, hover or focus for exact values, and click a point to highlight its model–cap row below. The five plots above show accuracy across all seven budgets.</p><div id="budget-charts" class="budget-chart-grid"></div></div></details><section id="budget-results"><div class="benchmark-heading"><div><h3>Complete token-budget results</h3><p>7 caps × 6 models · 42 reported configurations</p></div></div><div class="benchmark-selection"><span id="budget-selection-status" role="status" aria-live="polite">Click a budget-chart point to highlight its exact row.</span><button id="budget-locate-row" class="subtle-button" hidden>Show highlighted budget row</button></div><div id="budget-table-scroll" class="benchmark-scroll" tabindex="0" role="region" aria-label="Complete token-budget results table"><table id="budget-results-table" class="benchmark-table"><caption class="sr-only">All six models at seven caps. Results are grouped by cap, followed by paired tokens and accuracy columns for Average and each benchmark.</caption><thead><tr><th rowspan="2" scope="col" class="model-column">Model / cap</th><th colspan="2" scope="colgroup" class="average-group">Average</th><th colspan="2" scope="colgroup">AIME-2025</th><th colspan="2" scope="colgroup">MATH-500</th><th colspan="2" scope="colgroup">AMC</th><th colspan="2" scope="colgroup">OlympiadBench</th><th colspan="2" scope="colgroup">Output cost (USD)</th></tr><tr><th class="average-cell" scope="col">#Tk. ↓</th><th class="average-cell" scope="col">Acc. (%) ↑</th><th scope="col">#Tk. ↓</th><th scope="col">Acc. (%) ↑</th><th scope="col">#Tk. ↓</th><th scope="col">Acc. (%) ↑</th><th scope="col">#Tk. ↓</th><th scope="col">Acc. (%) ↑</th><th scope="col">#Tk. ↓</th><th scope="col">Acc. (%) ↑</th><th scope="col">Price / 1M</th><th scope="col">Cost / 1K</th></tr></thead><tbody id="budget-table-body"></tbody></table></div></section></section><section id="compression-limits" class="paper-section"><div class="paper-section-heading"><h2>Exploring Token Compression Limits</h2></div><figure id="figure-compression-limits" class="compression-figure" aria-label="Failure modes of length-controlled RL training, four interactive panels">
+  <div class="compression-toolbar">
+    <div id="compression-legend" class="legend" aria-label="Show or hide training methods"></div>
+  </div>
+  <p class="compression-instructions">Click within A, B, C, or D to zoom its X axis around that position. Each click halves that panel’s visible range. Use its Reset button to restore the full range. Hover to inspect values; ← / → inspect steps, Enter zooms, and Escape resets the focused panel.</p>
+  <div id="compression-charts" class="compression-chart-grid"></div>
+  <figcaption><strong>Failure modes of length-controlled RL training.</strong>
+    <strong>(A)</strong> Llama-3.2-8B-Instruct under vanilla GRPO. Response length oscillates wildly and locks at the 4096-token cap after <span class="paper-math" data-display="false" data-tex="\sim">\sim</span>200 steps.
+    <strong>(B)</strong> Qwen3-4B-Instruct under both GRPO (blue) and our KL variant (red). Both runs saturate at the cap with degenerate, repetitive outputs.
+    <strong>(C, D)</strong> Qwen3-0.6B-Base and DeepScaleR-1.5B trained with our method. Training is stable until the running compression scale crosses <span class="paper-math" data-display="false" data-tex="\approx 1.6\times">\approx 1.6\times</span> (dashed line, at step 355 for 0.6B and step 455 for 1.5B), after which length explodes, accuracy collapses to zero, and outputs degenerate into pure repetition.</figcaption>
+</figure>
+<div class="paper-prose compression-original-prose"><h3>Failure 1. Instruction-tuned models collapse under vanilla GRPO.</h3><p>Figure <a href="#figure-compression-limits">S7</a>(A) shows Llama-3.2-8B-Instruct trained with plain GRPO, without any compression-related modification. After an initial dip the response length oscillates violently and then saturates at the 4096-token cap, never recovering. We attribute this to two compounding effects of instruction tuning. First, SFT on instruction data sharply narrows the output entropy. The policy has already committed to a small set of high-probability templates, leaving little exploration headroom for the on-policy GRPO updates. Once a few reward gradients push the policy off these templates, the loss landscape becomes brittle and the model transitions abruptly between disparate output styles rather than improving smoothly. Second, instruction-tuned checkpoints carry strong stylistic priors, including preambles, headings, hedging phrases, and answer formatting, that act as implicit length regulators. Once the verifiable reward starts breaking those priors, the latent format constraint disappears and length grows without bound. Stable RLHF/RLVR pipelines on instruction models typically depend on heavy KL regularization to a frozen SFT reference, conservative learning-rate schedules, and reward models that explicitly penalize verbosity, none of which are present in vanilla GRPO. This is consistent with the common practice in the recent reasoning-RL literature of starting from base rather than instruction-tuned checkpoints.</p><h3>Failure 2. Qwen3-4B-Instruct exhibits the same pathology with both GRPO and our KL method.</h3><p>Figure <a href="#figure-compression-limits">S7</a>(B) confirms that this failure is not Llama-specific. On Qwen3-4B-Instruct, both vanilla GRPO and our KL variant converge to the same terminal state. Length pinned at 4096 and outputs collapsed onto a narrow set of repeating <span class="paper-math" data-display="false" data-tex="n">n</span>-grams. Manual inspection of late-training rollouts reveals that the model produces the same phrase or short paragraph dozens of times until the budget is exhausted. Once this regime is entered the verifier reward signal carries essentially no useful gradient information. The mechanism is a positive feedback loop characteristic of neural-text degeneration. The instruction-tuned policy starts in a low-entropy basin. The compression objective rewards short <em>correct</em> answers but provides no penalty for repetitive padding when the answer is wrong. As accuracy degrades the model pads more, lowering reward variance and further attenuating gradients. Crucially, in this setting our KL anchor is the instruction-tuned policy itself, so anchoring offers no protection. It pulls the policy back toward a reference that is already prone to degeneration.</p><h3>Failure 3. A hard compression limit at <span class="paper-math" data-display="false" data-tex="\approx 1.6\times">\approx 1.6\times</span>.</h3><p>Figures <a href="#figure-compression-limits">S7</a>(C) and <a href="#figure-compression-limits">S7</a>(D) reveal a more fundamental boundary that appears even on base models trained with our full method. Qwen3-0.6B-Base (C) and DeepScaleR-1.5B (D) train stably for several hundred steps, with average response length decreasing as expected. However, the running <em>compression scale</em>, defined as the ratio of the initial average CoT length to the current average length, keeps climbing, and at the moments marked by the dashed lines (step 355 for 0.6B and step 455 for 1.5B) it crosses approximately <span class="paper-math" data-display="false" data-tex="1.6\times">1.6\times</span>. At that crossing both runs undergo the same transition. A sharp burst of variance, a brief partial recovery, and then a runaway increase in length until the cap is hit. Post-collapse rollouts are uniformly degenerate (zero accuracy, length saturated at the maximum, outputs purely repetitive), mirroring the instruction-model failures of panels A and B. We interpret <span class="paper-math" data-display="false" data-tex="1.6\times">1.6\times</span> as an empirical lower bound on the information density of the reasoning trace. Below the corresponding length, the chain-of-thought no longer carries enough intermediate computation to support the final answer, the verifier reward becomes effectively random, and the policy loses any signal that would keep it in the compressed regime. In our experiments, this boundary appears similar across the 0.6B and 1.5B checkpoints despite their different absolute reasoning budgets. This finding aligns with a growing body of work arguing that chain-of-thought length is not cosmetic but corresponds to actual sequential computation, and that for problems of a given difficulty there exists a minimum number of intermediate tokens below which an autoregressive solver cannot succeed. Once that floor is crossed, the model abandons reasoning altogether and emits the maximum-length repetitive output that minimizes the immediate negative reward.</p><h3>Is the <span class="paper-math" data-display="false" data-tex="\sim 1.6\times">\sim 1.6\times</span> floor task-dependent?</h3><p>The <span class="paper-math" data-display="false" data-tex="1.6\times">1.6\times</span> value is observed on Qwen3-0.6B-Base and DeepScaleR-1.5B
+trained on DeepScaleR (math-only) and evaluated on the four math
+benchmarks of Tab. <a href="#benchmark-results">2</a>. We describe it as
+<em>backbone-agnostic</em> across these two checkpoints, not
+<em>task-agnostic</em>. Mechanistically the floor reflects the minimum
+number of intermediate tokens an autoregressive solver requires for
+problems drawn from a particular difficulty distribution, which is
+necessarily task-dependent. The supplementary budget-gradient analysis
+in §<a href="#budget-results">S11.2</a> is consistent with this view.
+MATH-500, the easiest of the four math benchmarks for our checkpoints,
+remains partially solvable down to <span class="paper-math" data-display="false" data-tex="1">1</span>K tokens (Step-Flash-196B-11B
+retains <span class="paper-math" data-display="false" data-tex="48.6\%">48.6\%</span> on MATH-500 at the <span class="paper-math" data-display="false" data-tex="1">1</span>K cap. Tab. <a href="#budget-results">S56</a>),
+while AIME-2025 collapses to <span class="paper-math" data-display="false" data-tex="0\%">0\%</span> on every one of the five large models
+once the cap drops below <span class="paper-math" data-display="false" data-tex="4">4</span>K (Tab. <a href="#budget-results">S55</a>). The
+<em>compression floor</em> is therefore lower on easier distributions and
+higher on harder ones. Reporting one number tied to a single
+distribution, DeepScaleR-style competition mathematics, is what we
+mean by “backbone-agnostic.” We did not retrain at the frontier on
+non-math tasks because the <span class="paper-math" data-display="false" data-tex="1.6\times">1.6\times</span> collapse is destructive
+(Fig. <a href="#figure-compression-limits">S7</a>(C, D)) and replicating these failure runs per
+task would be prohibitive. Characterising the floor as a function of
+task difficulty distribution is left to future work.</p></div></section><details id="paper-references" class="paper-section references-section"><summary>References for the paper excerpts</summary><p class="benchmark-note">Wording is excerpted from the source paper; reference numbering is local to this webpage.</p><ol><li id="reference-shao2024deepseekmath">Deepseekmath: Pushing the limits of mathematical reasoning in open language models · Shao, Zhihong and Wang, Peiyi and Zhu, Qihao and Xu, Runxin and Song, Junxiao and Bi, Xiao and Zhang, Haowei and Zhang, Mingchuan and Li, YK and Wu, Yang and others · 2024</li><li id="reference-schulman2017proximal">Proximal policy optimization algorithms · Schulman, John and Wolski, Filip and Dhariwal, Prafulla and Radford, Alec and Klimov, Oleg · 2017</li><li id="reference-schulman2015high">High-dimensional continuous control using generalized advantage estimation · Schulman, John and Moritz, Philipp and Levine, Sergey and Jordan, Michael and Abbeel, Pieter · 2015</li><li id="reference-ziegler2019fine">Fine-tuning language models from human preferences · Ziegler, Daniel M and Stiennon, Nisan and Wu, Jeffrey and Brown, Tom B and Radford, Alec and Amodei, Dario and Christiano, Paul and Irving, Geoffrey · 2019</li><li id="reference-ouyang2022training">Training language models to follow instructions with human feedback · Ouyang, Long and Wu, Jeffrey and Jiang, Xu and Almeida, Diogo and Wainwright, Carroll and Mishkin, Pamela and Zhang, Chong and Agarwal, Sandhini and Slama, Katarina and Ray, Alex and others · 2022</li><li id="reference-lin2024rho">Rho-1: Not all tokens are what you need · Lin, Zhenghao and Gou, Zhibin and Gong, Yeyun and Liu, Xiao and Shen, Yelong and Xu, Ruochen and Lin, Chen and Yang, Yujiu and Jiao, Jian and Duan, Nan and others · 2024</li><li id="reference-cui2025entropy">The entropy mechanism of reinforcement learning for reasoning language models · Cui, Ganqu and Zhang, Yuchen and Chen, Jiacheng and Yuan, Lifan and Wang, Zhi and Zuo, Yuxin and Li, Haozhan and Fan, Yuchen and Chen, Huayu and Chen, Weize and others · 2025</li><li id="reference-rafailov2023direct">Direct preference optimization: Your language model is secretly a reward model · Rafailov, Rafael and Sharma, Archit and Mitchell, Eric and Manning, Christopher D and Ermon, Stefano and Finn, Chelsea · 2023</li><li id="reference-bengio2009curriculum">Curriculum learning · Bengio, Yoshua and Louradour, J\&#x27;er\^ome and Collobert, Ronan and Weston, Jason · 2009</li><li id="reference-arora2025training">Training language models to reason efficiently · Arora, Daman and Zanette, Andrea · 2025</li><li id="reference-aggarwal2025l1">L1: Controlling how long a reasoning model thinks with reinforcement learning · Aggarwal, Pranjal and Welleck, Sean · 2025</li><li id="reference-hendrycks2020measuring">Measuring massive multitask language understanding · Hendrycks, Dan and Burns, Collin and Basart, Steven and Zou, Andy and Mazeika, Mantas and Song, Dawn and Steinhardt, Jacob · 2020</li><li id="reference-wang2024mmlu">Mmlu-pro: A more robust and challenging multi-task language understanding benchmark · Wang, Yubo and Ma, Xueguang and Zhang, Ge and Ni, Yuansheng and Chandra, Abhranil and Guo, Shiguang and Ren, Weiming and Arulraj, Aaran and He, Xuan and Jiang, Ziyan and others · 2024</li><li id="reference-zhong2024agieval">Agieval: A human-centric benchmark for evaluating foundation models · Zhong, Wanjun and Cui, Ruixiang and Guo, Yiduo and Liang, Yaobo and Lu, Shuai and Wang, Yanlin and Saied, Amin and Chen, Weizhu and Duan, Nan · 2024</li><li id="reference-rein2024gpqa">Gpqa: A graduate-level google-proof q\&amp;a benchmark · Rein, David and Hou, Betty Li and Stickland, Asa Cooper and Petty, Jackson and Pang, Richard Yuanzhe and Dirani, Julien and Michael, Julian and Bowman, Samuel R · 2024</li><li id="reference-bengio2003neural">A neural probabilistic language model · Bengio, Yoshua and Ducharme, R\&#x27;ejean and Vincent, Pascal and Jauvin, Christian · 2003</li><li id="reference-radford2018improving">Improving language understanding by generative pre-training · Radford, Alec and Narasimhan, Karthik and Salimans, Tim and Sutskever, Ilya and others · 2018</li><li id="reference-brown2020language">Language models are few-shot learners · Brown, Tom and Mann, Benjamin and Ryder, Nick and Subbiah, Melanie and Kaplan, Jared D and Dhariwal, Prafulla and Neelakantan, Arvind and Shyam, Pranav and Sastry, Girish and Askell, Amanda and others · 2020</li><li id="reference-wei2022chain">Chain-of-thought prompting elicits reasoning in large language models · Wei, Jason and Wang, Xuezhi and Schuurmans, Dale and Bosma, Maarten and Xia, Fei and Chi, Ed and Le, Quoc V and Zhou, Denny and others · 2022</li><li id="reference-kojima2022large">Large language models are zero-shot reasoners · Kojima, Takeshi and Gu, Shixiang Shane and Reid, Machel and Matsuo, Yutaka and Iwasawa, Yusuke · 2022</li><li id="reference-zelikman2022star">Star: Bootstrapping reasoning with reasoning · Zelikman, Eric and Wu, Yuhuai and Mu, Jesse and Goodman, Noah · 2022</li><li id="reference-yao2023tree">Tree of thoughts: Deliberate problem solving with large language models · Yao, Shunyu and Yu, Dian and Zhao, Jeffrey and Shafran, Izhak and Griffiths, Tom and Cao, Yuan and Narasimhan, Karthik · 2023</li><li id="reference-hao2024training">Training large language models to reason in a continuous latent space · Hao, Shibo and Sukhbaatar, Sainbayar and Su, DiJia and Li, Xian and Hu, Zhiting and Weston, Jason and Tian, Yuandong · 2024</li><li id="reference-chen2024not">Do not think that much for 2+ 3=? on the overthinking of o1-like llms · Chen, Xingyu and Xu, Jiahao and Liang, Tian and He, Zhiwei and Pang, Jianhui and Yu, Dian and Song, Linfeng and Liu, Qiuzhi and Zhou, Mengfei and Zhang, Zhuosheng and others · 2024</li><li id="reference-sui2025stop">Stop overthinking: A survey on efficient reasoning for large language models · Sui, Yang and Chuang, Yu-Neng and Wang, Guanchu and Zhang, Jiamu and Zhang, Tianyi and Yuan, Jiayi and Liu, Hongyi and Wen, Andrew and Zhong, Shaochen and Zou, Na and others · 2025</li><li id="reference-avogaro2026sparc">SPARC: Separating Perception And Reasoning Circuits for Test-time Scaling of VLMs · Avogaro, Niccolo and Debnath, Nayanika and Mi, Li and Frick, Thomas and Wang, Junling and He, Zexue and Hua, Hang and Schindler, Konrad and Rigotti, Mattia · 2026</li><li id="reference-sun2025latent">Latent chain-of-thought for visual reasoning · Sun, Guohao and Hua, Hang and Wang, Jian and Luo, Jiebo and Dianat, Sohail and Rabbani, Majid and Rao, Raghuveer and Tao, Zhiqiang · 2025</li><li id="reference-holtzman2019curious">The curious case of neural text degeneration · Holtzman, Ari and Buys, Jan and Du, Li and Forbes, Maxwell and Choi, Yejin · 2019</li><li id="reference-kaplan2020scaling">Scaling laws for neural language models · Kaplan, Jared and McCandlish, Sam and Henighan, Tom and Brown, Tom B and Chess, Benjamin and Child, Rewon and Gray, Scott and Radford, Alec and Wu, Jeffrey and Amodei, Dario · 2020</li><li id="reference-lightman2023let">Let&#x27;s verify step by step · Lightman, Hunter and Kosaraju, Vineet and Burda, Yuri and Edwards, Harrison and Baker, Bowen and Lee, Teddy and Leike, Jan and Schulman, John and Sutskever, Ilya and Cobbe, Karl · 2023</li><li id="reference-wang2024math">Math-shepherd: Verify and reinforce llms step-by-step without human annotations · Wang, Peiyi and Li, Lei and Shao, Zhihong and Xu, Runxin and Dai, Damai and Li, Yifei and Chen, Deli and Wu, Yu and Sui, Zhifang · 2024</li><li id="reference-wang2025beyond">Beyond the 80/20 rule: High-entropy minority tokens drive effective reinforcement learning for llm reasoning · Wang, Shenzhi and Yu, Le and Gao, Chang and Zheng, Chujie and Liu, Shixuan and Lu, Rui and Dang, Kai and Chen, Xionghui and Yang, Jianxin and Zhang, Zhenru and others · 2025</li><li id="reference-wang2024chain">Chain-of-thought reasoning without prompting · Wang, Xuezhi and Zhou, Denny · 2024</li><li id="reference-yang2025reasonflux">Reasonflux: Hierarchical llm reasoning via scaling thought templates · Yang, Ling and Yu, Zhaochen and Cui, Bin and Wang, Mengdi · 2025</li><li id="reference-guo2025deepseek">Deepseek-r1: Incentivizing reasoning capability in llms via reinforcement learning · Guo, Daya and Yang, Dejian and Zhang, Haowei and Song, Junxiao and Wang, Peiyi and Zhu, Qihao and Xu, Runxin and Zhang, Ruoyu and Ma, Shirong and Bi, Xiao and others · 2025</li><li id="reference-muennighoff2025s1">s1: Simple test-time scaling · Muennighoff, Niklas and Yang, Zitong and Shi, Weijia and Li, Xiang Lisa and Fei-Fei, Li and Hajishirzi, Hannaneh and Zettlemoyer, Luke and Liang, Percy and Cand\`es, Emmanuel and Hashimoto, Tatsunori B · 2025</li><li id="reference-jin2024impact">The impact of reasoning step length on large language models · Jin, Mingyu and Yu, Qinkai and Shu, Dong and Zhao, Haiyan and Hua, Wenyue and Meng, Yanda and Zhang, Yongfeng and Du, Mengnan · 2024</li><li id="reference-hendrycks2021measuring">Measuring mathematical problem solving with the math dataset · Hendrycks, Dan and Burns, Collin and Kadavath, Saurav and Arora, Akul and Basart, Steven and Tang, Eric and Song, Dawn and Steinhardt, Jacob · 2021</li><li id="reference-he2024olympiadbench">Olympiadbench: A challenging benchmark for promoting agi with olympiad-level bilingual multimodal scientific problems · He, Chaoqun and Luo, Renjie and Bai, Yuzhuo and Hu, Shengding and Thai, Zhen and Shen, Junhao and Hu, Jinyi and Han, Xu and Huang, Yujie and Zhang, Yuxiang and others · 2024</li></ol></details>
+
+  <footer><span><span aria-hidden="true">🔍💎</span> TokenProbe · Accuracy–cost comparison</span><button id="reset-view">Reset view</button><p class="page-disclaimer">This page was compiled with the assistance of ChatGPT 6 sol and may contain errors in data transcription or presentation. Please refer to the original paper as the authoritative source. Any discrepancies should be attributed to the preparation of this page.</p></footer>
+</main>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+<noscript><p class="noscript">Enable JavaScript to explore the charts.</p></noscript>
+</body>
+</html>

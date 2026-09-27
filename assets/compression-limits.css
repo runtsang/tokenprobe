@@ -1,0 +1,28 @@
+.compression-figure{margin:28px 0 36px;color:#303036}
+.compression-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}
+#compression-legend{margin:0;display:flex;gap:24px;flex-wrap:wrap}
+#compression-legend button{display:flex;align-items:center;gap:8px}
+#compression-legend button[aria-pressed=false]{opacity:.4;text-decoration:line-through}
+.compression-key{display:inline-block;width:24px;height:0;border-top:3px solid var(--series-color)}
+.compression-key[data-method=KL]{border-top-style:dashed}
+.compression-instructions{font-size:12px;line-height:1.7;color:#737379;margin:0 0 22px}
+.compression-chart-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 26px}
+.compression-panel{position:relative;min-width:0;border-top:1px solid #e1e1e5;padding-top:16px}
+.compression-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.compression-panel-heading h4{font:normal 19px/1.4 Georgia,'Times New Roman',serif;margin:0}
+.compression-panel-heading button{flex-shrink:0;background:#fff;border:1px solid #dedee2;border-radius:5px;font:11px Arial,sans-serif;color:#555;padding:7px 11px;cursor:pointer}
+.compression-panel-heading button:hover{background:#f0f7f1;border-color:#b9cdbf}
+.compression-panel-range{font:11px/1.5 Arial,sans-serif;color:#737379;font-variant-numeric:tabular-nums;margin:7px 0 0}
+.compression-plot [data-chart-hit]{cursor:zoom-in}
+.compression-plot{display:block;width:100%;height:auto;touch-action:pan-y}
+.compression-plot:focus-visible{outline:2px solid #267b4e;outline-offset:2px}
+.compression-plot text{font:12px Arial,sans-serif;fill:#737379}
+.compression-plot .compression-axis-title{fill:#303036}
+.compression-line{fill:none;stroke-width:1.65;stroke-linejoin:round}
+.compression-panel-detail{min-height:46px;margin:3px 0 0;color:#555;font-size:12px;line-height:1.7;font-variant-numeric:tabular-nums}
+.compression-panel-detail span{white-space:nowrap;display:inline-block;margin-right:12px}
+.compression-figure figcaption{font-size:12px;line-height:1.85;color:#666;border-top:1px solid #e5e5e7;margin-top:22px;padding-top:16px}
+.compression-original-prose h3{font:normal 21px/1.5 Georgia,'Times New Roman',serif;margin:30px 0 12px}
+.compression-original-prose h3 .katex{font-size:1em}
+@media(max-width:760px){.compression-chart-grid{grid-template-columns:1fr}}
+@media(max-width:420px){.compression-panel-heading h4{font-size:17px}.compression-instructions{font-size:11px}.compression-panel-detail{min-height:64px}}

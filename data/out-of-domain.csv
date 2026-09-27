@@ -1,0 +1,82 @@
+﻿Model,Average_tokens,Average_accuracy,MMLU_tokens,MMLU_accuracy,MMLU-Pro_tokens,MMLU-Pro_accuracy,LSAT_tokens,LSAT_accuracy,GPQA_tokens,GPQA_accuracy,Output_price_USD_per_M,Output_cost_USD_per_1000_responses,HF_identifier,OpenRouter_identifier,Price_type,Price_snapshot,Price_source
+GPT-5.4-Mini,,,,,,,,,,,4.5,,,,API output price,2026-09-24,Paper output-price snapshot
+Claude-4.6-Sonnet,1290,57.1,645,88.8,965,73,1797,35.7,1754,30.8,15.0,19.35,,,API output price,2026-09-24,Paper output-price snapshot
+Grok-4.1-Fast,2892,88.2,1026,90.9,2288,84.1,2797,96.1,5459,81.8,0.5,1.446,,,API output price,2026-09-24,Paper output-price snapshot
+Gemini-3.1-Pro,1294,68.6,681,92.8,1055,80.3,1727,54.4,1714,47,12.0,15.528,,,API output price,2026-09-24,Paper output-price snapshot
+Gemini-3-Flash,1651,29.1,1123,64.9,1593,33.9,1915,12.6,1973,5.1,3.0,4.953,,,API output price,2026-09-24,Paper output-price snapshot
+Claude-4.6-Opus,,,,,,,,,,,25.0,,,,API output price,2026-09-24,Paper output-price snapshot
+Claude-4.5-Haiku,1090,72,706,88.6,883,79.8,1521,54.8,1250,64.7,5.0,5.45,,,API output price,2026-09-24,Paper output-price snapshot
+Gemini-3.1-Flash-Lite,,,,,,,,,,,1.5,,,,API output price,2026-09-24,Paper output-price snapshot
+GPT-4o,443,71.9,345,86.8,474,70.2,563,38.3,646,43.9,10.0,4.43,,,API output price,2026-09-24,Paper output-price snapshot
+GPT-5.2 Pro,495,84.7,215,92.8,437,82,1393,82.2,1162,60.6,168.0,83.16,,,API output price,2026-09-24,Paper output-price snapshot
+GPT-5.4 Pro,667,85.7,378,93.1,670,83,1371,86.5,1307,61.1,180.0,120.06,,,API output price,2026-09-24,Paper output-price snapshot
+GPT-5.5,373,88.7,208,94.4,363,85.1,709,96.1,865,69.2,30.0,11.19,,,API output price,2026-09-24,Paper output-price snapshot
+GPT-5.5 Pro,675,83.9,429,92.4,685,80.7,1115,87,1347,53,180.0,121.5,,,API output price,2026-09-24,Paper output-price snapshot
+OpenAI o1,989,61,553,84.2,1056,60.2,1942,0,1748,18.7,60.0,59.34,,,API output price,2026-09-24,Paper output-price snapshot
+OpenAI o3,774,68.5,425,88.9,757,64.4,1722,31.7,1518,28.8,8.0,6.192,,,API output price,2026-09-24,Paper output-price snapshot
+Grok-4.20 (non-reasoning),1229,67.3,929,84.3,1252,67.4,1901,23.9,1850,30.8,2.5,3.0725,,,API output price,2026-09-24,Paper output-price snapshot
+Grok-4.20 (reasoning),2526,90.5,1393,92.8,2707,86.8,3794,96.1,5951,91.2,2.5,6.315,,,API output price,2026-09-24,Paper output-price snapshot
+Grok-4.20-0309 (non-reasoning),1235,66.4,935,83.9,1258,65.9,1900,23.5,1862,30.3,2.5,3.0875,,,API output price,2026-09-24,Paper output-price snapshot
+Grok-4.20-0309 (reasoning),2501,91.1,1384,93.3,2705,87.3,3767,96.1,5744,93.2,2.5,6.2525,,,API output price,2026-09-24,Paper output-price snapshot
+Grok-4.3,898,89.7,629,92.9,850,86.1,1810,95.2,1443,84.8,2.5,2.245,,,API output price,2026-09-24,Paper output-price snapshot
+Gemini-3.1-Pro (8K budget),,,,,,,,,,,12.0,,,,API output price,2026-09-24,Paper output-price snapshot
+Qwen3-Next-80B-3B,1843,24.5,1509,62.3,1802,32.8,2031,0.9,2032,2,1.2,2.2116,qwen/qwen3-next-80b-a3b-thinking,qwen/qwen3-next-80b-a3b-thinking,OpenRouter API snapshot,2026-09-27,https://openrouter.ai/qwen/qwen3-next-80b-a3b-thinking
+GLM-358B-32B,1575,39.8,962,75.6,1460,50.3,1936,16.1,1942,17.2,2.2,3.465,zai-org/GLM-4.7,z-ai/glm-4.7,OpenRouter API snapshot,2026-09-27,https://openrouter.ai/z-ai/glm-4.7
+DeepSeek-671B-37B,1556,43.6,918,82.1,1442,54.5,1938,19.6,1926,18.2,0.4,0.6224,deepseek-ai/DeepSeek-V3.2,deepseek/deepseek-v3.2,OpenRouter API snapshot,2026-09-27,https://openrouter.ai/deepseek/deepseek-v3.2
+Kimi-1T-32B,,,,,,,,,,,2.5,,moonshotai/kimi-k2-thinking,moonshotai/kimi-k2-thinking,OpenRouter API snapshot,2026-09-27,https://openrouter.ai/moonshotai/kimi-k2-thinking
+GLM-744B-40B,,,,,,,,,,,1.92,,zai-org/GLM-5,z-ai/glm-5,OpenRouter API snapshot,2026-09-27,https://openrouter.ai/z-ai/glm-5
+DeepSeek-1.6T-49B,,,,,,,,,,,0.696,,deepseek-ai/DeepSeek-V4-Pro,deepseek/deepseek-v4-pro,OpenRouter API snapshot,2026-09-27,https://openrouter.ai/deepseek/deepseek-v4-pro
+DeepSeek-284B-13B,,,,,,,,,,,0.0938,,deepseek-ai/DeepSeek-V4-Flash,deepseek/deepseek-v4-flash,OpenRouter API snapshot,2026-09-27,https://openrouter.ai/deepseek/deepseek-v4-flash
+GPT-117B-5B,980,15.3,289,21.6,597,17.7,1671,8.6,1363,13.2,0.6,0.588,openai/gpt-oss-120b,openai/gpt-oss-120b,OpenRouter API snapshot,2026-09-27,https://openrouter.ai/openai/gpt-oss-120b
+DEER,,,,,,,,,,,,,,,unavailable,,
+NoThink,,,,,,,,,,,,,,,unavailable,,
+L1,,,,,,,,,,,,,,,unavailable,,
+O1-Pruner,,,,,,,,,,,,,,,unavailable,,
+PEAR,,,,,,,,,,,,,,,unavailable,,
+ETR,,,,,,,,,,,,,,,unavailable,,
+Qwen3-0.6B (base),,,,,,,,,,,,,,,unavailable,,
+Qwen3-0.6B + Selective KL Anchoring,,,,,,,,,,,,,,,unavailable,,
+Qwen3-0.6B + Reward Shaping,,,,,,,,,,,,,,,unavailable,,
+DeepScaleR-1.5B (base),,,,,,,,,,,,,,,unavailable,,
+DeepScaleR-1.5B + Selective KL Anchoring,,,,,,,,,,,,,,,unavailable,,
+DeepScaleR-1.5B + Reward Shaping,,,,,,,,,,,,,,,unavailable,,
+Qwen3-4B (base),4401,59.6,1775,80.3,3466,63.6,5907,61.7,6457,32.8,0.1,0.4401,,,serving estimate,Serving estimate,Paper serving estimate; conservative high-side assumption
+Qwen3-4B + Selective KL Anchoring,935,60.6,446,77.9,721,64.6,1574,50.4,1000,49.5,0.1,0.0935,,,serving estimate,Serving estimate,Paper serving estimate; conservative high-side assumption
+Qwen3-4B + Reward Shaping,1179,57.7,664,78.1,933,63.5,1796,43.9,1323,45.5,0.1,0.1179,,,serving estimate,Serving estimate,Paper serving estimate; conservative high-side assumption
+Phi-Reasoning-4B (base),,,,,,,,,,,,,,,unavailable,,
+Phi-Reasoning-4B + Selective KL Anchoring,,,,,,,,,,,,,,,unavailable,,
+Phi-Reasoning-4B + Reward Shaping,,,,,,,,,,,,,,,unavailable,,
+Qwen3-8B (base),,,,,,,,,,,0.13,,,,serving estimate,Serving estimate,Qwen3.5-9B output price used as a proxy estimate
+Qwen3-8B + Selective KL Anchoring,,,,,,,,,,,0.13,,,,serving estimate,Serving estimate,Qwen3.5-9B output price used as a proxy estimate
+Qwen3-8B + Reward Shaping,,,,,,,,,,,0.13,,,,serving estimate,Serving estimate,Qwen3.5-9B output price used as a proxy estimate
+Qwen3-4B (2K hard cap),,,,,,,,,,,0.1,,,,serving estimate,Serving estimate,Paper serving estimate; conservative high-side assumption
+Qwen-3.6-Plus @32K,,,,,,,,,,,1.651,,,,API output price,2026-09-24,Paper output-price snapshot
+Gemini-3-Flash (32K budget),,,,,,,,,,,3.0,,,,API output price,2026-09-24,Paper output-price snapshot
+Qwen3-Next-80B-3B (32K budget),,,,,,,,,,,1.2,,qwen/qwen3-next-80b-a3b-thinking,qwen/qwen3-next-80b-a3b-thinking,OpenRouter API snapshot,2026-09-27,https://openrouter.ai/qwen/qwen3-next-80b-a3b-thinking
+GLM-Air-106B-12B (32K budget),,,,,,,,,,,0.85,,zai-org/GLM-4.5-Air,z-ai/glm-4.5-air,OpenRouter API snapshot,2026-09-27,https://openrouter.ai/z-ai/glm-4.5-air
+Step-Flash-196B-11B (32K budget),,,,,,,,,,,0.3,,stepfun-ai/Step-3.5-Flash,stepfun/step-3.5-flash,OpenRouter API snapshot,2026-09-27,https://openrouter.ai/stepfun/step-3.5-flash
+Hunyuan3-295B-21B (32K budget),,,,,,,,,,,0.6,,tencent/Hy3-preview,tencent/hy3-preview,OpenRouter API snapshot,2026-09-27,https://openrouter.ai/tencent/hy3-preview
+Qwen-3.6-Plus (16K budget),,,,,,,,,,,1.651,,,,API output price,2026-09-24,Paper output-price snapshot
+Gemini-3-Flash (16K budget),,,,,,,,,,,3.0,,,,API output price,2026-09-24,Paper output-price snapshot
+Qwen3-Next-80B-3B (16K budget),,,,,,,,,,,1.2,,qwen/qwen3-next-80b-a3b-thinking,qwen/qwen3-next-80b-a3b-thinking,OpenRouter API snapshot,2026-09-27,https://openrouter.ai/qwen/qwen3-next-80b-a3b-thinking
+GLM-Air-106B-12B (16K budget),,,,,,,,,,,0.85,,zai-org/GLM-4.5-Air,z-ai/glm-4.5-air,OpenRouter API snapshot,2026-09-27,https://openrouter.ai/z-ai/glm-4.5-air
+Step-Flash-196B-11B (16K budget),,,,,,,,,,,0.3,,stepfun-ai/Step-3.5-Flash,stepfun/step-3.5-flash,OpenRouter API snapshot,2026-09-27,https://openrouter.ai/stepfun/step-3.5-flash
+Hunyuan3-295B-21B (16K budget),,,,,,,,,,,0.6,,tencent/Hy3-preview,tencent/hy3-preview,OpenRouter API snapshot,2026-09-27,https://openrouter.ai/tencent/hy3-preview
+Qwen-3.6-Plus (8K budget),,,,,,,,,,,1.651,,,,API output price,2026-09-24,Paper output-price snapshot
+Gemini-3-Flash (8K budget),,,,,,,,,,,3.0,,,,API output price,2026-09-24,Paper output-price snapshot
+Qwen3-Next-80B-3B (8K budget),,,,,,,,,,,1.2,,qwen/qwen3-next-80b-a3b-thinking,qwen/qwen3-next-80b-a3b-thinking,OpenRouter API snapshot,2026-09-27,https://openrouter.ai/qwen/qwen3-next-80b-a3b-thinking
+GLM-Air-106B-12B (8K budget),,,,,,,,,,,0.85,,zai-org/GLM-4.5-Air,z-ai/glm-4.5-air,OpenRouter API snapshot,2026-09-27,https://openrouter.ai/z-ai/glm-4.5-air
+Step-Flash-196B-11B (8K budget),,,,,,,,,,,0.3,,stepfun-ai/Step-3.5-Flash,stepfun/step-3.5-flash,OpenRouter API snapshot,2026-09-27,https://openrouter.ai/stepfun/step-3.5-flash
+Hunyuan3-295B-21B (8K budget),,,,,,,,,,,0.6,,tencent/Hy3-preview,tencent/hy3-preview,OpenRouter API snapshot,2026-09-27,https://openrouter.ai/tencent/hy3-preview
+Qwen-3.6-Plus (4K budget),,,,,,,,,,,1.651,,,,API output price,2026-09-24,Paper output-price snapshot
+Gemini-3-Flash (4K budget),,,,,,,,,,,3.0,,,,API output price,2026-09-24,Paper output-price snapshot
+Qwen3-Next-80B-3B (4K budget),,,,,,,,,,,1.2,,qwen/qwen3-next-80b-a3b-thinking,qwen/qwen3-next-80b-a3b-thinking,OpenRouter API snapshot,2026-09-27,https://openrouter.ai/qwen/qwen3-next-80b-a3b-thinking
+GLM-Air-106B-12B (4K budget),,,,,,,,,,,0.85,,zai-org/GLM-4.5-Air,z-ai/glm-4.5-air,OpenRouter API snapshot,2026-09-27,https://openrouter.ai/z-ai/glm-4.5-air
+Step-Flash-196B-11B (4K budget),,,,,,,,,,,0.3,,stepfun-ai/Step-3.5-Flash,stepfun/step-3.5-flash,OpenRouter API snapshot,2026-09-27,https://openrouter.ai/stepfun/step-3.5-flash
+Hunyuan3-295B-21B (4K budget),,,,,,,,,,,0.6,,tencent/Hy3-preview,tencent/hy3-preview,OpenRouter API snapshot,2026-09-27,https://openrouter.ai/tencent/hy3-preview
+Qwen-3.6-Plus (1K budget),,,,,,,,,,,1.651,,,,API output price,2026-09-24,Paper output-price snapshot
+Gemini-3-Flash (1K budget),,,,,,,,,,,3.0,,,,API output price,2026-09-24,Paper output-price snapshot
+Qwen3-Next-80B-3B (1K budget),,,,,,,,,,,1.2,,qwen/qwen3-next-80b-a3b-thinking,qwen/qwen3-next-80b-a3b-thinking,OpenRouter API snapshot,2026-09-27,https://openrouter.ai/qwen/qwen3-next-80b-a3b-thinking
+GLM-Air-106B-12B (1K budget),,,,,,,,,,,0.85,,zai-org/GLM-4.5-Air,z-ai/glm-4.5-air,OpenRouter API snapshot,2026-09-27,https://openrouter.ai/z-ai/glm-4.5-air
+Step-Flash-196B-11B (1K budget),,,,,,,,,,,0.3,,stepfun-ai/Step-3.5-Flash,stepfun/step-3.5-flash,OpenRouter API snapshot,2026-09-27,https://openrouter.ai/stepfun/step-3.5-flash
+Hunyuan3-295B-21B (1K budget),,,,,,,,,,,0.6,,tencent/Hy3-preview,tencent/hy3-preview,OpenRouter API snapshot,2026-09-27,https://openrouter.ai/tencent/hy3-preview
