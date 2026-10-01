@@ -29,3 +29,15 @@ main h2{text-align:center}
 @media(min-width:1100px){main{max-width:1640px;padding-left:220px;padding-right:34px}}
 @media(max-width:1099px){.floating-toc{left:12px;top:50%;bottom:auto;width:220px;max-height:calc(100dvh - 90px);box-shadow:0 4px 20px #00000014}.toc-heading{padding:7px 10px 0}.toc-heading button{display:block}.toc-current{padding:5px 10px 10px;border:0}.toc-current small{display:none}.toc-current strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px}.floating-toc:not(.is-open) #toc-links{display:none}.floating-toc.is-open .toc-current{border-bottom:1px solid #e8ede9}.floating-toc.is-open #toc-links{max-height:48dvh;overflow-y:auto}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* Let readers minimize the chapter guide; remove it on narrow phones. */
+.toc-actions{display:flex;align-items:center;gap:2px}
+.toc-heading #toc-collapse{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;padding:0;font-size:19px;line-height:1}
+.toc-heading button:hover{background:#eef7f0}
+.toc-reopen{display:none}
+.floating-toc.is-collapsed{width:28px;height:28px;max-height:none;overflow:visible;border-radius:50%;background:#edf7f0;border-color:#b9d9c4;box-shadow:0 3px 12px #00000018}
+.floating-toc.is-collapsed .toc-heading,.floating-toc.is-collapsed .toc-current,.floating-toc.is-collapsed #toc-links{display:none}
+.floating-toc.is-collapsed .toc-reopen{display:flex;width:100%;height:100%;align-items:center;justify-content:center;border:0;border-radius:50%;background:transparent;cursor:pointer}
+.toc-reopen span{width:8px;height:8px;border-radius:50%;background:#31935b}
+.floating-toc.is-collapsed .toc-reopen:hover{background:#d9efdf}
+@media(max-width:767px){.floating-toc{display:none}}

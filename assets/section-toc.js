@@ -3,6 +3,8 @@
   const toc = document.querySelector('.floating-toc');
   if (!toc) return;
   const toggle = document.getElementById('toc-toggle');
+  const collapse = document.getElementById('toc-collapse');
+  const reopen = document.getElementById('toc-reopen');
   const current = document.getElementById('toc-current');
   const entries = [...toc.querySelectorAll('nav a')].map(link => ({
     link, target: document.getElementById(link.hash.slice(1))
@@ -14,6 +16,16 @@
     toggle.setAttribute('aria-label', `${open ? 'Close' : 'Open'} chapter navigation`);
   }
   toggle.addEventListener('click', () => setOpen(!toc.classList.contains('is-open')));
+  collapse.addEventListener('click', () => {
+    setOpen(false);
+    toc.classList.add('is-collapsed');
+    reopen.focus();
+  });
+  reopen.addEventListener('click', () => {
+    toc.classList.remove('is-collapsed');
+    setOpen(!compact.matches);
+    collapse.focus();
+  });
   toc.addEventListener('keydown', event => {
     if (event.key === 'Escape') { setOpen(false); toggle.focus(); }
   });
